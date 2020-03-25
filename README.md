@@ -46,6 +46,8 @@ docker run --rm  --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 -v
 ```
 
 After that, you should be able to access PostgreSQL shell
+
+If you have psql client installed
 ```shell script
 $ psql -h localhost -U postgres -d postgres
 Password for user postgres:
@@ -53,6 +55,12 @@ psql (10.12 (Ubuntu 10.12-0ubuntu0.18.04.1), server 9.6.16)
 Type "help" for help.
 
 postgres=#
+```
+
+Otherwise try
+
+```shell script
+docker exec --tty --interactive pg-docker psql -h localhost -U postgres -d postgres
 ```
 A password will be asked, used the one defined in variable POSTGRES_PASSWORD when you ran the docker. (here it is `docker`)
 
