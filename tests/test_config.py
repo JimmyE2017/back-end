@@ -1,5 +1,7 @@
 import unittest
 
+from mongoengine import disconnect
+
 from app import create_app
 
 
@@ -10,6 +12,9 @@ class TestDevelopmentConfig(unittest.TestCase):
     def test_app_config(self):
         self.assertTrue(self.app.config["DEBUG"])
 
+    def tearDown(self) -> None:
+        disconnect()
+
 
 class TestTestingConfig(unittest.TestCase):
     def setUp(self) -> None:
@@ -19,6 +24,9 @@ class TestTestingConfig(unittest.TestCase):
         self.assertTrue(self.app.config["DEBUG"])
         self.assertTrue(self.app.config["TESTING"])
 
+    def tearDown(self) -> None:
+        disconnect()
+
 
 class TestProductionConfig(unittest.TestCase):
     def setUp(self) -> None:
@@ -26,3 +34,6 @@ class TestProductionConfig(unittest.TestCase):
 
     def test_app_config(self):
         self.assertFalse(self.app.config["DEBUG"])
+
+    def tearDown(self) -> None:
+        disconnect()
