@@ -78,6 +78,12 @@ SQLALCHEMY_DATABASE_URI = "postgresql://user_test:password@localhost:5432/test_c
 They are currently hardcoded in the config file. Need to move that to env file.
 
 ## Running the server
+Create/update tables (Apply DB migrations)
+```shell script
+python manage.py db upgrade
+```
+
+
 In development
 ```shell script
 $ python manage.py run
@@ -109,4 +115,52 @@ $ python manage.py shell
 >>> from app.services.user_services import create_admin_user
 >>> data = {"email": "admin@test.com", "password":"password", "first_name": "First name", "last_name": "Last Name"}
 >>> create_admin_user(json.dumps(data))
+```
+
+## Contributing
+### Project architecture
+```text
+.
+├── app/
+│   ├── api/
+│   │   └── v1/
+│   ├── common/
+│   │   ├── access_level.py
+│   │   ├── errors.py
+│   ├── config.py
+│   ├── extensions.py
+│   ├── __init__.py
+│   ├── models/
+│   ├── schemas/
+│   ├── services/
+│   └── urls.py
+├── manage.py
+├── migrations/
+├── scripts/
+└── tests
+```
+
+Folders :
+- `app/api/` holds all the `Ressource` object from flask-restful. (Basically the endpoints we define)
+- `app/common/` holds methods and variables that are shared among all services
+- `app/models/` holds the SQLAlchemy models linked to the tables in DB
+- `app/schemas/` holds marshmallow schemas that handles the serialization/deserialization of the data.
+- `app/services/` holds the logics of the code.
+- `tests/` holds all the tests files
+- `migrations/` holds the Alembic migrations files (automatically generated)
+
+Files :
+- `app/urls.py` defines the pattern of the urls linked to our endpoints
+- `app/config.py` defines the config of the app
+- `app/__init__.py` holds the `create_app` method for the application factory
+- `manage.py` defines the CLI commands
+
+### Running test
+We are using pytest, so simply executes one of the following
+```shell script
+pytest
+python -m pytest (all tests)
+python -m pytest tests/ (all tests)
+python -m pytest tests/test_sample.py (single test file)
+python -m pytest tests/utils/test_sample.py::test_answer_correct (single test method)
 ```
