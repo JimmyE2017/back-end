@@ -46,15 +46,15 @@ docker-compose -f docker/docker-compose.yml up --build -d
 
 After that, you should be able to access Mongo shell through docker by
 ```shell script
-$ docker exec -it mongo_caplc mongo mongodb://caplc_user:password123@127.0.0.1:27017/caplc
+$ docker exec -it mongo_caplc mongo mongodb://caplc_user:password123@127.0.0.1:27017/caplcDevDB
 ```
 
-FYI, DBs should be already set up by file `docker/mongo-init.js`
+FYI, DBs are set up by file `docker/mongo-init.js` at the creation of the container
 
 With this, the app should be able to access the DB using the following configs
 ```python
-MONGODB_SETTINGS = {"db": "caplc", "host": "mongodb://caplc_user:password123@127.0.0.1:27017"}
-MONGODB_SETTINGS = {"db": "caplc_test", "host": "mongodb://caplc_user:password123@127.0.0.1:27017"}
+MONGODB_SETTINGS = {"db": "caplcDevDB", "host": "mongodb://caplc_user:password123@127.0.0.1:27017/caplcDevDB"}
+MONGODB_SETTINGS = {"db": "caplcTestDB", "host": "mongodb://caplc_user:password123@127.0.0.1:27017/caplcTestDB"}
 ```
 They are currently hardcoded in the config file. Need to move that to env file.
 
