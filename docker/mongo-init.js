@@ -1,6 +1,6 @@
 db.auth('mongocaplc', 'mongocaplc');
 
-db = db.getSiblingDB('caplcDevDB');
+db = db.getSiblingDB('caplcDB');
 
 db.createUser(
     {
@@ -9,13 +9,13 @@ db.createUser(
         roles: [
             {
                 role: "readWrite",
-                db: "caplcDevDB"
+                db: "caplcDB"
             }
         ]
     }
 );
 
-db = db.getSiblingDB('caplcTestDB');
+db = db.getSiblingDB('caplcDBTest');
 db.createUser(
     {
         user: "caplc_user",
@@ -23,7 +23,7 @@ db.createUser(
         roles: [
             {
                 role: "readWrite",
-                db: "caplcTestDB"
+                db: "caplcDBTest"
             }
         ]
     }

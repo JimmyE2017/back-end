@@ -1,0 +1,26 @@
+version: '3.7'
+
+services:
+    mongodb:
+        image: mongo:4.2.5
+        container_name: mongo_caplc
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME:?err}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:?err}
+        ports:
+            - ${MONGODB_PORT}:27017
+        command: mongod --auth
+    caplc_api:
+        build: .
+        ports:
+            - 5000:5000
+        env_file:
+          - ../venv/production.env
+        volumes:
+            - ../app:app
+        depends_on:
+          - mongodb
+        command: flask run
+networks:
+ default:
+  name: caplc_network

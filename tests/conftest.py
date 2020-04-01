@@ -38,7 +38,7 @@ def db(app, request):
 
     def teardown():
         me = get_db()
-        db_name = app.config["MONGODB_SETTINGS"]["db"]
+        db_name = app.config["MONGODB_DB"]
         for collection in me.client.get_database(db_name).list_collection_names():
             me.client.get_database(db_name).drop_collection(collection)
 

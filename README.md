@@ -34,44 +34,65 @@ Install pre-commit
 ```shell script
 pre-commit install
 ```
+## Setting up environment variables
+Project is configured using environment variables in the following files.
+- `venv/local.env`
+- `venv/development.env`
+- `venv/production.env`
 
-## Setting up Mongo
+They are ignored by git so you'll have to create the file according to the setup you want.
+You can use `venv/env.example` as a template
+Adapt the setting accordingly.
+For the local setup, you don't have to do anything except of copying the env.example to the correct file.
+```shell script
+$ mv venv/env.example venv/local.env
+```
+
+Then to export those variables, run :
+```shell script
+export $(grep -v '^#' venv/local.env | xargs)
+```
+WARNING : The variables are exported for the current session only. They need to be re-exported
+once you open another terminal
+
+Add it your `.bashrc` if you want the variable to be exported everytime you open a terminal.
+
+## Setting up Mongo locally
 Install [Docker](https://www.docker.com/get-started)
+
 Install [Docker Compose](https://docs.docker.com/compose/install/)
 
 Start Mongo container
 ```shell script
-docker-compose -f docker/docker-compose.yml up --build -d
+$ docker-compose -f docker/docker-compose.mongo_only.yml up --build -d
+Creating mongo_caplc ... done
 ```
 
 After that, you should be able to access Mongo shell through docker by
 ```shell script
-$ docker exec -it mongo_caplc mongo mongodb://caplc_user:password123@127.0.0.1:27017/caplcDevDB
+$ docker exec -it mongo_caplc mongo mongodb://caplc_user:password123@127.0.0.1:27017/caplcDB
+MongoDB shell version v4.2.5
+connecting to: mongodb://127.0.0.1:27017/caplcDB?compressors=disabled&gssapiServiceName=mongodb
+Implicit session: session { "id" : UUID("16e3d350-9cfc-430b-bf73-c957f0de67c6") }
+MongoDB server version: 4.2.5
+>
 ```
 
-FYI, DBs are set up by file `docker/mongo-init.js` at the creation of the container
+FYI, those credentials are currently hardcoded in the setup file `docker/mongo-init.js` which is run at the creation of the container.
 
-With this, the app should be able to access the DB using the following configs
-```python
-MONGODB_SETTINGS = {"db": "caplcDevDB", "host": "mongodb://caplc_user:password123@127.0.0.1:27017/caplcDevDB"}
-MONGODB_SETTINGS = {"db": "caplcTestDB", "host": "mongodb://caplc_user:password123@127.0.0.1:27017/caplcTestDB"}
-```
-They are currently hardcoded in the config file. Need to move that to env file.
+You may need to change it according to your `local.env` file
 
 ## Running the server
-In development
+Locally
 ```shell script
-$ python manage.py run
- * Serving Flask app "app" (lazy loading)
- * Environment: production
-   WARNING: This is a development server. Do not use it in a production deployment.
-   Use a production WSGI server instead.
+$ flask run
+ * Serving Flask app "app:create_app('dev')" (lazy loading)
+ * Environment: development
  * Debug mode: on
  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
  * Restarting with stat
  * Debugger is active!
- * Debugger PIN: 118-492-186
-
+ * Debugger PIN: 210-427-520
 
 ```
 
@@ -85,7 +106,7 @@ $ curl 127.0.0.1:5000/api/ping
 
 Adding an admin (Can only be done through shell currently)
 ```shell script
-$ python manage.py shell
+$ flask shell
 >>> import json
 >>> from app.services.user_services import create_admin_user
 >>> data = {"email": "admin@test.com", "password":"password", "firstName": "First name", "lastName": "Last Name"}
