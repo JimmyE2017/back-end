@@ -1,37 +1,36 @@
+import datetime
 import os
-
-# uncomment the line below for postgres database url from environment variable
-# postgres_local_base = os.environ['DATABASE_URL']
-
-basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 # TODO : Add env file
 class Config:
-    SECRET_KEY = os.getenv("SECRET_KEY", "my_precious_secret_key")
+    SECRET_KEY = os.getenv("CAPLC_SECRET_KEY", "my_precious_secret_key")
+    JWT_SECRET_KEY = SECRET_KEY
     DEBUG = False
+    RESTFUL_JSON = dict(indent=2, sort_keys=False, separators=(", ", ": "))
+    JWT_BLACKLIST_ENABLED = True
+    JWT_BLACKLIST_TOKEN_CHECKS = ["access"]
+    JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(days=2)
+    MONGODB_USERNAME = os.getenv("CAPLC_MONGODB_USERNAME")
+    MONGODB_PASSWORD = os.getenv("CAPLC_MONGODB_PASSWORD")
+    MONGODB_DB = os.getenv("CAPLC_MONGODB_DB")
+    MONGODB_HOST = os.getenv("CAPLC_MONGODB_HOST")
+    MONGODB_PORT = int(os.getenv("CAPLC_MONGODB_PORT"))
+    MONGODB_AUTHENTICATION_SOURCE = "test"
 
 
 class DevelopmentConfig(Config):
-    # uncomment the line below to use postgres
-    # SQLALCHEMY_DATABASE_URI = postgres_local_base
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, "flask_boilerplate_main.db")
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
 class TestingConfig(Config):
     DEBUG = True
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, "flask_boilerplate_test.db")
-    PRESERVE_CONTEXT_ON_EXCEPTION = False
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    MONGODB_DB = Config.MONGODB_DB + "Test"
 
 
 class ProductionConfig(Config):
     DEBUG = False
-    # uncomment the line below to use postgres
-    # SQLALCHEMY_DATABASE_URI = postgres_local_base
 
 
 config_by_name = dict(dev=DevelopmentConfig, test=TestingConfig, prod=ProductionConfig)
