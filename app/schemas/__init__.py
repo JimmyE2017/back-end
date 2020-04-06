@@ -16,8 +16,8 @@ class CustomSchema(Schema):
         try:
             data = self.loads(data)
         except ValidationError as e:
-            msg, err_code = INVALID_DATA_ERROR.get_error()
-            err_msg = {"msg": msg, "details": e.messages}
+            err_msg, err_code = INVALID_DATA_ERROR.get_error()
+            err_msg.update({"details": e.messages})
             return None, err_msg, err_code
 
         return data, None, 200
