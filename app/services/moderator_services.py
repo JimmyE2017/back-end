@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash
 
 from app.common.errors import (
     ADMIN_DELETION_ERROR,
+    EMPTY_BODY_ERROR,
     ENTITY_NOT_FOUND_ERROR,
     USER_ALREADY_EXISTS_ERROR,
 )
@@ -29,6 +30,9 @@ def get_all_moderators() -> (dict, int):
 
 
 def create_moderator(data: bytes) -> (dict, int):
+    if len(data) == 0:
+        return EMPTY_BODY_ERROR.get_error()
+
     # Validate data
     try:
         data = UserSchema().loads(data)

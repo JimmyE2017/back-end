@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from app.common.errors import USER_ALREADY_EXISTS_ERROR
+from app.common.errors import EMPTY_BODY_ERROR, USER_ALREADY_EXISTS_ERROR
 from app.models.user_model import UserModel
 
 # Test Data
@@ -173,3 +173,13 @@ def test_post_moderators_with_invalid_data(client, auth, init_admin, data):
 
     assert response.status_code == 400
     assert UserModel.find_by_email(data.get("email", "")) is None
+
+
+def test_post_moderators_with_empty_body(client, auth, init_admin):
+    headers = auth.login(email="admin@test.com")
+
+    response = client.post("/api/v1/moderators", headers=headers)
+    response_data, status_code = json.loads(response.data), response.status_code
+
+    assert response_data == EMPTY_BODY_ERROR.content
+    assert status_code == EMPTY_BODY_ERROR.error_code
