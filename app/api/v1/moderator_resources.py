@@ -13,7 +13,7 @@ from app.services.moderator_services import (
 
 class ModeratorListResource(Resource):
     @jwt_required
-    @requires_access_level(Roles.PARTICIPANT)
+    @requires_access_level(Roles.MODERATOR)
     def get(self):
         return get_all_moderators()
 
