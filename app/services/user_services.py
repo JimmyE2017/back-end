@@ -1,5 +1,4 @@
 from flask_jwt_extended import create_access_token, get_raw_jwt
-from marshmallow import ValidationError
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.common.errors import (
@@ -12,11 +11,10 @@ from app.schemas.user_schemas import LoginSchema, UserSchema
 
 
 def login(data: bytes) -> (dict, int):
-    # Deserialized data
-    try:
-        data = LoginSchema().loads(data)
-    except ValidationError as e:
-        return e.messages, 400
+    # Deserialize data
+    data, err_msg, err_code = LoginSchema().loads_or_400(data)
+    if err_msg:
+        return err_msg, err_code
 
     user = UserModel.find_by_email(email=data["email"])
 
@@ -40,10 +38,9 @@ def logout() -> (dict, int):
 
 
 def create_admin_user(data: bytes) -> (dict, int):
-    try:
-        data = UserSchema().loads(data)
-    except ValidationError as e:
-        return e.messages, 400
+    data, err_msg, err_code = UserSchema().loads_or_400(data)
+    if err_msg:
+        return err_msg, err_code
 
     user = UserModel(**data)
     # Check if user already exist

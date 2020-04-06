@@ -41,6 +41,9 @@ REVOKED_TOKEN = BaseError(
 PERMISSION_DENIED = BaseError(ErrorType.AUTHORIZATION_ERROR, "Permission Denied.", 403)
 
 # Invalid data errors
+INVALID_DATA_ERROR = BaseError(
+    ErrorType.INVALID_DATA_ERROR, "Error while loading data.", 400
+)
 USER_ALREADY_EXISTS_ERROR = BaseError(
     ErrorType.INVALID_DATA_ERROR, "User already exists.", 400
 )
