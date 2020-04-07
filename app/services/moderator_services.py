@@ -1,4 +1,3 @@
-from marshmallow import ValidationError
 from werkzeug.security import generate_password_hash
 
 from app.common.errors import (
@@ -29,11 +28,9 @@ def get_all_moderators() -> (dict, int):
 
 
 def create_moderator(data: bytes) -> (dict, int):
-    # Validate data
-    try:
-        data = UserSchema().loads(data)
-    except ValidationError as e:
-        return e.messages, 400
+    data, err_msg, err_code = UserSchema().loads_or_400(data)
+    if err_msg:
+        return err_msg, err_code
 
     user = UserModel(**data)
 
