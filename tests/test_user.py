@@ -6,14 +6,14 @@ from flask_jwt_extended import create_access_token
 from werkzeug.security import check_password_hash
 
 from app.common.errors import (
-    EMAIL_NOT_FOUND_ERROR,
-    EXPIRED_TOKEN,
-    INVALID_DATA_ERROR,
-    INVALID_PASSWORD_ERROR,
-    INVALID_TOKEN,
-    PERMISSION_DENIED,
-    REVOKED_TOKEN,
-    UNAUTHORIZED_TOKEN,
+    EmailNotFoundError,
+    ExpiredTokenError,
+    InvalidDataError,
+    InvalidPasswordError,
+    InvalidTokenError,
+    PermissionDeniedError,
+    RevokedTokenError,
+    UnauthorizedTokenError,
 )
 from app.common.mail.schemas import password_reset_schema
 from app.models.user_model import UserModel
@@ -38,8 +38,8 @@ def test_unsuccessful_login_wrong_email(client, init_admin):
 
     response = client.post("api/v1/login", data=json.dumps(data))
     response_data, status_code = json.loads(response.data), response.status_code
-    assert status_code == EMAIL_NOT_FOUND_ERROR.error_code
-    assert response_data == EMAIL_NOT_FOUND_ERROR.content
+    assert status_code == EmailNotFoundError.code
+    assert response_data == EmailNotFoundError().get_content()
 
 
 def test_unsuccessful_login_wrong_password(client, init_admin):
@@ -47,8 +47,8 @@ def test_unsuccessful_login_wrong_password(client, init_admin):
 
     response = client.post("api/v1/login", data=json.dumps(data))
     response_data, status_code = json.loads(response.data), response.status_code
-    assert response_data == INVALID_PASSWORD_ERROR.content
-    assert status_code == INVALID_PASSWORD_ERROR.error_code
+    assert response_data == InvalidPasswordError().get_content()
+    assert status_code == InvalidPasswordError.code
 
 
 def test_succesful_logout(client, auth, init_admin):
@@ -64,8 +64,8 @@ def test_unauthorized_request(client, db):
     response = client.delete("api/v1/logout")
 
     response_data, status_code = json.loads(response.data), response.status_code
-    assert response_data == UNAUTHORIZED_TOKEN.content
-    assert status_code == UNAUTHORIZED_TOKEN.error_code
+    assert response_data == UnauthorizedTokenError().get_content()
+    assert status_code == UnauthorizedTokenError.code
 
 
 # Request with expired token
@@ -80,8 +80,8 @@ def test_with_expired_token(client, db):
     )
 
     response_data, status_code = json.loads(response.data), response.status_code
-    assert response_data == EXPIRED_TOKEN.content
-    assert status_code == EXPIRED_TOKEN.error_code
+    assert response_data == ExpiredTokenError().get_content()
+    assert status_code == ExpiredTokenError.code
 
 
 # Request with invalid token
@@ -91,8 +91,8 @@ def test_with_invalid_token(client, db):
     )
 
     response_data, status_code = json.loads(response.data), response.status_code
-    assert response_data == INVALID_TOKEN.content
-    assert status_code == INVALID_TOKEN.error_code
+    assert response_data == InvalidTokenError().get_content()
+    assert status_code == InvalidTokenError.code
 
 
 # Request with revoked token
@@ -102,8 +102,8 @@ def test_with_revoked_token(client, auth, init_admin):
     response = client.delete("api/v1/logout", headers=headers)
 
     response_data, status_code = json.loads(response.data), response.status_code
-    assert response_data == REVOKED_TOKEN.content
-    assert status_code == REVOKED_TOKEN.error_code
+    assert response_data == RevokedTokenError().get_content()
+    assert status_code == RevokedTokenError.code
 
 
 def test_access_level_too_low(client, auth, init_moderator):
@@ -113,8 +113,8 @@ def test_access_level_too_low(client, auth, init_moderator):
     response = client.post("/api/v1/moderators", headers=headers, data=json.dumps({}))
     response_data, status_code = json.loads(response.data), response.status_code
 
-    assert status_code == PERMISSION_DENIED.error_code
-    assert response_data == PERMISSION_DENIED.content
+    assert status_code == PermissionDeniedError.code
+    assert response_data == PermissionDeniedError().get_content()
 
 
 def test_good_access_level(client, auth, init_moderator):
@@ -141,8 +141,8 @@ def test_forgotten_password_invalid_data(client, init_moderator):
     response = client.post("/api/v1/forgotten_password", data=json.dumps(data))
     response_data, status_code = json.loads(response.data), response.status_code
 
-    assert status_code == EMAIL_NOT_FOUND_ERROR.error_code
-    assert response_data == EMAIL_NOT_FOUND_ERROR.content
+    assert status_code == EmailNotFoundError.code
+    assert response_data == EmailNotFoundError().get_content()
 
 
 def test_reset_password(client, init_moderator):
@@ -172,8 +172,8 @@ def test_reset_password_invalid_token(client, init_moderator):
     )
     response_data, status_code = json.loads(response.data), response.status_code
 
-    assert status_code == INVALID_TOKEN.error_code
-    assert response_data == INVALID_TOKEN.content
+    assert status_code == InvalidTokenError.code
+    assert response_data == InvalidTokenError().get_content()
 
 
 def test_reset_password_invalid_new_password(client, init_moderator):
@@ -186,7 +186,5 @@ def test_reset_password_invalid_new_password(client, init_moderator):
         data=json.dumps(data),
         query_string={"access_token": token},
     )
-    response_data, status_code = json.loads(response.data), response.status_code
 
-    assert status_code == INVALID_DATA_ERROR.error_code
-    assert response_data == INVALID_DATA_ERROR.content
+    assert response.status_code == InvalidDataError.code

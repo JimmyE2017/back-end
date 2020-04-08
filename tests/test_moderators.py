@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from app.common.errors import EMPTY_BODY_ERROR, USER_ALREADY_EXISTS_ERROR
+from app.common.errors import EmptyBodyError, UserAlreadyExistsError
 from app.models.user_model import UserModel
 
 # Test Data
@@ -124,8 +124,8 @@ class TestModeratorRessourcesWithExistingData:
         )
         response_data, status_code = json.loads(response.data), response.status_code
 
-        assert status_code == USER_ALREADY_EXISTS_ERROR.error_code
-        assert response_data == USER_ALREADY_EXISTS_ERROR.content
+        assert status_code == UserAlreadyExistsError.code
+        assert response_data == UserAlreadyExistsError().get_content()
 
 
 def test_delete_moderators(client, auth, init_admin, request):
@@ -181,5 +181,5 @@ def test_post_moderators_with_empty_body(client, auth, init_admin):
     response = client.post("/api/v1/moderators", headers=headers)
     response_data, status_code = json.loads(response.data), response.status_code
 
-    assert response_data == EMPTY_BODY_ERROR.content
-    assert status_code == EMPTY_BODY_ERROR.error_code
+    assert response_data == EmptyBodyError().get_content()
+    assert status_code == EmptyBodyError.code

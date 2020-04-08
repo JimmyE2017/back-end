@@ -1,9 +1,9 @@
 from werkzeug.security import generate_password_hash
 
 from app.common.errors import (
-    ADMIN_DELETION_ERROR,
-    ENTITY_NOT_FOUND_ERROR,
-    USER_ALREADY_EXISTS_ERROR,
+    AdminDeletionError,
+    EntityNotFoundError,
+    UserAlreadyExistsError,
 )
 from app.models.user_model import Roles, UserModel
 from app.schemas.user_schemas import UserSchema
@@ -14,7 +14,7 @@ def get_moderator(moderator_id) -> (dict, int):
 
     # Check if given moderator_id exists in DB
     if moderator is None:
-        return ENTITY_NOT_FOUND_ERROR.get_error()
+        raise EntityNotFoundError
 
     return moderator, 200
 
@@ -36,7 +36,7 @@ def create_moderator(data: bytes) -> (dict, int):
 
     # Check if user already exist
     if UserModel.find_by_email(user.email) is not None:
-        return USER_ALREADY_EXISTS_ERROR.get_error()
+        raise UserAlreadyExistsError
 
     user.role = Roles.MODERATOR.value  # Setting role
     # Encrypt password
@@ -54,11 +54,11 @@ def delete_moderator(moderator_id: str) -> (dict, int):
 
     # Check if given moderator_id exists in DB
     if moderator is None:
-        return ENTITY_NOT_FOUND_ERROR.get_error()
+        raise EntityNotFoundError
 
     # Prevent deletion of admin
     if moderator.role == Roles.ADMIN.value:
-        return ADMIN_DELETION_ERROR.get_error()
+        raise AdminDeletionError
 
     # Delete user in DB
     moderator.delete()

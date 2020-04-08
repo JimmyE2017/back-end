@@ -7,47 +7,93 @@ class ErrorType(Enum):
     BAD_REQUEST_ERROR = "Bad Request Error"
 
 
-class BaseError(object):
-    def __init__(self, type_error: ErrorType, msg: str, error_code: int):
-        self.msg = msg
-        self.type_error = type_error
-        self.error_code = error_code
-        self.content = {"msg": f"{self.type_error.value}: {self.msg}"}
+class CustomException(Exception):
+    error_type = None
+    msg = ""
+    code = 500
+
+    def __init__(self, details: dict = None):
+        self.details = details
+
+    def get_content(self) -> dict:
+        content = {"msg": f"{self.error_type.value}: {self.msg}"}
+        if self.details:
+            content.update({"details": self.details})
+        return content
 
     def get_error(self) -> (dict, int):
-        return self.content, self.error_code
+        return self.get_content(), self.code
 
 
-# Authorization errors
-UNAUTHORIZED_TOKEN = BaseError(
-    ErrorType.AUTHORIZATION_ERROR, "Missing access token. You must login first.", 401
-)
-EXPIRED_TOKEN = BaseError(
-    ErrorType.AUTHORIZATION_ERROR, "Expired token. Please login again.", 401
-)
-INVALID_TOKEN = BaseError(ErrorType.AUTHORIZATION_ERROR, "Invalid token.", 401)
-REVOKED_TOKEN = BaseError(
-    ErrorType.AUTHORIZATION_ERROR, "Revoked token. Please login again.", 401
-)
-PERMISSION_DENIED = BaseError(ErrorType.AUTHORIZATION_ERROR, "Permission Denied.", 403)
+# Authorization Errors
+class UnauthorizedTokenError(CustomException):
+    error_type = ErrorType.AUTHORIZATION_ERROR
+    msg = "Missing access token. You must login first."
+    code = 401
 
-# Invalid data errors
-EMAIL_NOT_FOUND_ERROR = BaseError(ErrorType.INVALID_DATA_ERROR, "Email not found", 404)
-INVALID_PASSWORD_ERROR = BaseError(
-    ErrorType.INVALID_DATA_ERROR, "Incorrect password", 400
-)
-INVALID_DATA_ERROR = BaseError(
-    ErrorType.INVALID_DATA_ERROR, "Error while loading data.", 400
-)
-USER_ALREADY_EXISTS_ERROR = BaseError(
-    ErrorType.INVALID_DATA_ERROR, "User already exists.", 400
-)
-ENTITY_NOT_FOUND_ERROR = BaseError(
-    ErrorType.BAD_REQUEST_ERROR, "Entity not found.", 404
-)
-EMPTY_BODY_ERROR = BaseError(
-    ErrorType.INVALID_DATA_ERROR, "Body should not be empty", 400
-)
-ADMIN_DELETION_ERROR = BaseError(
-    ErrorType.INVALID_DATA_ERROR, "Admin user can't be deleted.", 409
-)
+
+class InvalidTokenError(CustomException):
+    error_type = ErrorType.AUTHORIZATION_ERROR
+    msg = "Invalid token."
+    code = 401
+
+
+class ExpiredTokenError(CustomException):
+    error_type = ErrorType.AUTHORIZATION_ERROR
+    msg = "Expired token. Please login again."
+    code = 401
+
+
+class RevokedTokenError(CustomException):
+    error_type = ErrorType.AUTHORIZATION_ERROR
+    msg = "Revoked token. Please login again."
+    code = 401
+
+
+class PermissionDeniedError(CustomException):
+    error_type = ErrorType.AUTHORIZATION_ERROR
+    msg = "Permission Denied."
+    code = 403
+
+
+# Invalid Data Errors
+class EmailNotFoundError(CustomException):
+    error_type = ErrorType.INVALID_DATA_ERROR
+    msg = "Email not found."
+    code = 404
+
+
+class InvalidPasswordError(CustomException):
+    error_type = ErrorType.INVALID_DATA_ERROR
+    msg = "Incorrect password."
+    code = 400
+
+
+class InvalidDataError(CustomException):
+    error_type = ErrorType.INVALID_DATA_ERROR
+    msg = "Incorrect password."
+    code = 400
+
+
+class UserAlreadyExistsError(CustomException):
+    error_type = ErrorType.INVALID_DATA_ERROR
+    msg = "User already exists."
+    code = 400
+
+
+class EntityNotFoundError(CustomException):
+    error_type = ErrorType.INVALID_DATA_ERROR
+    msg = "Entity not found."
+    code = 404
+
+
+class EmptyBodyError(CustomException):
+    error_type = ErrorType.INVALID_DATA_ERROR
+    msg = "Body should not be empty."
+    code = 400
+
+
+class AdminDeletionError(CustomException):
+    error_type = ErrorType.INVALID_DATA_ERROR
+    msg = "Admin user can't be deleted."
+    code = 409

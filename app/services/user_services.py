@@ -2,12 +2,11 @@ from flask_jwt_extended import create_access_token, decode_token, get_raw_jwt
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.common.errors import (
-    EMAIL_NOT_FOUND_ERROR,
-    ENTITY_NOT_FOUND_ERROR,
-    INVALID_PASSWORD_ERROR,
-    USER_ALREADY_EXISTS_ERROR,
-    BaseError,
-    ErrorType,
+    EmailNotFoundError,
+    EntityNotFoundError,
+    InvalidPasswordError,
+    InvalidTokenError,
+    UserAlreadyExistsError,
 )
 from app.models.user_model import BlacklistTokenModel, Roles, UserModel
 from app.schemas.user_schemas import (
@@ -27,10 +26,10 @@ def login(data: bytes) -> (dict, int):
     user = UserModel.find_by_email(email=data["email"])
 
     if user is None:
-        return EMAIL_NOT_FOUND_ERROR.get_error()
+        raise EmailNotFoundError
 
     if not check_password_hash(pwhash=user.password, password=data["password"]):
-        return INVALID_PASSWORD_ERROR.get_error()
+        raise InvalidPasswordError
 
     access_token = create_access_token(identity=user.id, fresh=True)
 
@@ -54,7 +53,7 @@ def forgotten_password(data: bytes) -> (dict, int):
     # Get user from email
     user = UserModel.find_by_email(email=data["email"])
     if user is None:
-        return EMAIL_NOT_FOUND_ERROR.get_error()
+        raise EmailNotFoundError
 
     user.send_reset_password_mail()
 
@@ -64,18 +63,15 @@ def forgotten_password(data: bytes) -> (dict, int):
 def update_password(params: dict, data: bytes) -> (None, int):
     # Validate and decode access token
     if "access_token" not in params:
-        error = BaseError(
-            ErrorType.AUTHORIZATION_ERROR,
-            "Missing access token. You must add an access_token parameter",
-            401,
-        )
-        return error.get_error()
+        error = InvalidTokenError()
+        error.msg = ("Missing access token. You must add an access_token parameter",)
+        raise error
     token = params.get("access_token")
     decoded_token = decode_token(token)
 
     user = UserModel.find_by_id(user_id=decoded_token.get("identity"))
     if user is None:
-        return ENTITY_NOT_FOUND_ERROR.get_error()
+        raise EntityNotFoundError
 
     # Load new password
     data, err_msg, err_code = NewPasswordSchema().loads_or_400(data)
@@ -96,7 +92,7 @@ def create_admin_user(data: bytes) -> (dict, int):
     user = UserModel(**data)
     # Check if user already exist
     if UserModel.find_by_email(user.email) is not None:
-        return USER_ALREADY_EXISTS_ERROR.get_error()
+        raise UserAlreadyExistsError
 
     # Setting userId, role and encrypt password
     user.role = Roles.ADMIN.value

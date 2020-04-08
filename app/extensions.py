@@ -1,8 +1,10 @@
+from flask import jsonify, make_response
+
 from app.common.errors import (
-    EXPIRED_TOKEN,
-    INVALID_TOKEN,
-    REVOKED_TOKEN,
-    UNAUTHORIZED_TOKEN,
+    ExpiredTokenError,
+    InvalidTokenError,
+    RevokedTokenError,
+    UnauthorizedTokenError,
 )
 from app.models.user_model import BlacklistTokenModel, UserModel
 
@@ -16,19 +18,23 @@ def setup_jwt(jwt):
 
     @jwt.unauthorized_loader
     def unauthorized_callback(msg: str) -> (dict, int):
-        return UNAUTHORIZED_TOKEN.get_error()
+        e = UnauthorizedTokenError()
+        return make_response(jsonify(e.get_content()), e.code)
 
     @jwt.expired_token_loader
     def expired_token_callback(msg: str) -> (dict, int):
-        return EXPIRED_TOKEN.get_error()
+        e = ExpiredTokenError()
+        return make_response(jsonify(e.get_content()), e.code)
 
     @jwt.invalid_token_loader
     def invalid_token_callback(msg: str) -> (dict, int):
-        return INVALID_TOKEN.get_error()
+        e = InvalidTokenError()
+        return make_response(jsonify(e.get_content()), e.code)
 
     @jwt.revoked_token_loader
     def revoked_token_callback() -> (dict, int):
-        return REVOKED_TOKEN.get_error()
+        e = RevokedTokenError()
+        return make_response(jsonify(e.get_content()), e.code)
 
     @jwt.user_loader_callback_loader
     def get_user_from_identity(user_id: str) -> UserModel:

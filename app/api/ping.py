@@ -1,8 +1,9 @@
-from flask_restful import Resource
+from flask import jsonify, make_response
+from flask.views import MethodView
 
 
-class PingResource(Resource):
+class PingView(MethodView):
     def get(self):
         response = {"data": "pong"}
 
-        return response, 200
+        return make_response(jsonify(response), 200)

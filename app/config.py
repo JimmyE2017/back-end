@@ -9,7 +9,7 @@ class Config:
     DEBUG = False
     PREFERRED_URL_SCHEME = os.getenv("PREFERRED_URL_SCHEME", "")
     # Flask-resful
-    RESTFUL_JSON = dict(indent=2, sort_keys=False, separators=(", ", ": "))
+    JSONIFY_PRETTYPRINT_REGULAR = True
 
     # Flask-JWT-Extended
     JWT_BLACKLIST_ENABLED = True
