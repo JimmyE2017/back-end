@@ -1,12 +1,13 @@
 import datetime
 import json
 
-from flask import Flask, make_response
+from flask import Flask, jsonify, make_response
 from flask_jwt_extended import JWTManager
-from flask_restful import Api
 from mongoengine.base.document import BaseDocument
 from mongoengine.fields import DBRef, ObjectId
 from mongoengine.queryset.base import BaseQuerySet
+
+from app.common.errors import CustomException
 
 from .config import config_by_name
 from .extensions import setup_jwt
@@ -17,8 +18,11 @@ class MongoEngineEncoder(json.JSONEncoder):
     """Handles Encoding of ObjectId's"""
 
     def default(self, obj, **kwargs):
-
-        if isinstance(obj, datetime.datetime):
+        if isinstance(obj, BaseQuerySet):
+            return [d.to_mongo() for d in obj]
+        elif isinstance(obj, BaseDocument):
+            return obj.to_mongo()
+        elif isinstance(obj, datetime.datetime):
             return obj.isoformat()
         elif isinstance(obj, datetime.date):
             return obj.strftime("%Y-%m-%d")
@@ -31,6 +35,11 @@ class MongoEngineEncoder(json.JSONEncoder):
                 "database": obj.database,
             }
         return json.JSONEncoder.default(self, obj)
+
+
+def _register_view(app, view, endpoint, url, methods):
+    view_func = view.as_view(endpoint)
+    app.add_url_rule(url, view_func=view_func, methods=methods)
 
 
 def create_app(config_name="dev"):
@@ -53,26 +62,16 @@ def create_app(config_name="dev"):
     # Setup Flask-Mail
     mail.init_app(app)
 
-    # Routing URLs
-    api = Api(app)
+    # Setup custom json encoder
+    app.json_encoder = MongoEngineEncoder
+
+    # Setup custom error handler
+    @app.errorhandler(CustomException)
+    def handle_exception(e):
+        return make_response(jsonify(e.get_content()), e.code)
+
+    # Routing
     for urlpattern in urlpatterns:
-        api.add_resource(
-            urlpattern["resource"], urlpattern["url"], endpoint=urlpattern["endpoint"]
-        )
-
-    # JSON Output
-    @api.representation("application/json")
-    def output_json(data, code, headers=None):
-        """Makes a Flask response with a JSON encoded body"""
-        if isinstance(data, BaseQuerySet):
-            json_data = json.dumps([d.to_mongo() for d in data], cls=MongoEngineEncoder)
-
-        elif isinstance(data, BaseDocument):
-            json_data = json.dumps(data.to_mongo(), cls=MongoEngineEncoder)
-        else:
-            json_data = json.dumps(data)
-        resp = make_response(json_data, code)
-        resp.headers.extend(headers or {})
-        return resp
+        _register_view(app, **urlpattern)
 
     return app

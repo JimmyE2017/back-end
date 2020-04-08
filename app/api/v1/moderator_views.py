@@ -1,6 +1,6 @@
-from flask import request
+from flask import jsonify, make_response, request
+from flask.views import MethodView
 from flask_jwt_extended import jwt_required
-from flask_restful import Resource
 
 from app.common.access_level import requires_access_level
 from app.models.user_model import Roles
@@ -11,21 +11,24 @@ from app.services.moderator_services import (
 )
 
 
-class ModeratorListResource(Resource):
+class ModeratorListView(MethodView):
     @jwt_required
     @requires_access_level(Roles.MODERATOR)
     def get(self):
-        return get_all_moderators()
+        response, code = get_all_moderators()
+        return make_response(jsonify(response), code)
 
     @jwt_required
     @requires_access_level(Roles.ADMIN)
     def post(self):
         data = request.data
-        return create_moderator(data)
+        response, code = create_moderator(data)
+        return make_response(jsonify(response), code)
 
 
-class ModeratorResource(Resource):
+class ModeratorView(MethodView):
     @jwt_required
     @requires_access_level(Roles.ADMIN)
     def delete(self, moderator_id):
-        return delete_moderator(moderator_id)
+        response, code = delete_moderator(moderator_id)
+        return make_response(jsonify(response), code)
