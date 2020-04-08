@@ -2,7 +2,6 @@ from enum import Enum
 
 
 class ErrorType(Enum):
-    LOGIN_ERROR = "Login Error"
     AUTHORIZATION_ERROR = "Authorization Error"
     INVALID_DATA_ERROR = "Invalid Data Error"
     BAD_REQUEST_ERROR = "Bad Request Error"
@@ -19,14 +18,6 @@ class BaseError(object):
         return self.content, self.error_code
 
 
-# Login errors
-UNSUCCESSFUL_LOGIN_EMAIL_NOT_FOUND = BaseError(
-    ErrorType.LOGIN_ERROR, "Email not found", 404
-)
-UNSUCCESSFUL_LOGIN_WRONG_PASSWORD = BaseError(
-    ErrorType.LOGIN_ERROR, "Incorrect password", 400
-)
-
 # Authorization errors
 UNAUTHORIZED_TOKEN = BaseError(
     ErrorType.AUTHORIZATION_ERROR, "Missing access token. You must login first.", 401
@@ -41,6 +32,10 @@ REVOKED_TOKEN = BaseError(
 PERMISSION_DENIED = BaseError(ErrorType.AUTHORIZATION_ERROR, "Permission Denied.", 403)
 
 # Invalid data errors
+EMAIL_NOT_FOUND_ERROR = BaseError(ErrorType.INVALID_DATA_ERROR, "Email not found", 404)
+INVALID_PASSWORD_ERROR = BaseError(
+    ErrorType.INVALID_DATA_ERROR, "Incorrect password", 400
+)
 INVALID_DATA_ERROR = BaseError(
     ErrorType.INVALID_DATA_ERROR, "Error while loading data.", 400
 )

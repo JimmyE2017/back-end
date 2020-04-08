@@ -35,6 +35,7 @@ class MongoEngineEncoder(json.JSONEncoder):
 
 def create_app(config_name="dev"):
     from app.models import db
+    from app.common.mail import mail
 
     app = Flask(__name__)
 
@@ -44,14 +45,16 @@ def create_app(config_name="dev"):
     # Setup DB
     db.init_app(app)
 
-    # Setup JWT-extended
+    # Setup Flask-JWT-extended
     jwt = JWTManager(app)
     setup_jwt(jwt)
     jwt.init_app(app)
 
-    api = Api(app)
+    # Setup Flask-Mail
+    mail.init_app(app)
 
-    # Routing
+    # Routing URLs
+    api = Api(app)
     for urlpattern in urlpatterns:
         api.add_resource(
             urlpattern["resource"], urlpattern["url"], endpoint=urlpattern["endpoint"]

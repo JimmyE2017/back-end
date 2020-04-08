@@ -2,21 +2,36 @@ import datetime
 import os
 
 
-# TODO : Add env file
 class Config:
-    SECRET_KEY = os.getenv("CAPLC_SECRET_KEY", "my_precious_secret_key")
+    # Flask
+    SECRET_KEY = os.getenv("SECRET_KEY", "my_precious_secret_key")
     JWT_SECRET_KEY = SECRET_KEY
     DEBUG = False
+    PREFERRED_URL_SCHEME = os.getenv("PREFERRED_URL_SCHEME", "")
+    # Flask-resful
     RESTFUL_JSON = dict(indent=2, sort_keys=False, separators=(", ", ": "))
+
+    # Flask-JWT-Extended
     JWT_BLACKLIST_ENABLED = True
     JWT_BLACKLIST_TOKEN_CHECKS = ["access"]
     JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(days=2)
-    MONGODB_USERNAME = os.getenv("CAPLC_MONGODB_USERNAME")
-    MONGODB_PASSWORD = os.getenv("CAPLC_MONGODB_PASSWORD")
-    MONGODB_DB = os.getenv("CAPLC_MONGODB_DB")
-    MONGODB_HOST = os.getenv("CAPLC_MONGODB_HOST")
-    MONGODB_PORT = int(os.getenv("CAPLC_MONGODB_PORT"))
-    MONGODB_AUTHENTICATION_SOURCE = "test"
+
+    # Flask-MongoEngine
+    MONGODB_USERNAME = os.getenv("MONGODB_USERNAME")
+    MONGODB_PASSWORD = os.getenv("MONGODB_PASSWORD")
+    MONGODB_DB = os.getenv("MONGODB_DB")
+    MONGODB_HOST = os.getenv("MONGODB_HOST")
+    MONGODB_PORT = int(os.getenv("MONGODB_PORT"))
+
+    # Flask Mail
+    MAIL_SERVER = os.getenv("MAIL_SERVER")
+    MAIL_PORT = int(os.getenv("MAIL_PORT"))
+    MAIL_USE_TLS = bool(int(os.getenv("MAIL_USE_TLS", 0)))
+    MAIL_USE_SSL = bool(int(os.getenv("MAIL_USE_SSL", 0)))
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER") or MAIL_USERNAME
+    MAIL_SUPPRESS_SEND = True  # Prevent from sending email
 
 
 class DevelopmentConfig(Config):
@@ -31,6 +46,7 @@ class TestingConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
+    MAIL_SUPPRESS_SEND = False
 
 
 config_by_name = dict(dev=DevelopmentConfig, test=TestingConfig, prod=ProductionConfig)
