@@ -5,6 +5,7 @@ from mongoengine import get_db
 from werkzeug.security import generate_password_hash
 
 from app import create_app
+from app.common.mail import mail as _mail
 from app.models import db as _db
 from app.models.user_model import UserModel
 
@@ -44,6 +45,13 @@ def db(app, request):
 
     request.addfinalizer(teardown)
     return _db
+
+
+@pytest.fixture(scope="session")
+def mail(app):
+    """A test client for the app."""
+    _mail.app = app
+    return _mail
 
 
 # TODO : Check if the following two functions can be less repetitive

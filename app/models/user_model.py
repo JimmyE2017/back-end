@@ -3,8 +3,11 @@ from __future__ import annotations
 import datetime
 from enum import Enum
 
+from flask import current_app
+from flask_jwt_extended import create_access_token
 from mongoengine import QuerySet
 
+from app.common.mail.mail_services import send_reset_password_mail
 from app.common.uuid_generator import generate_id
 from app.models import db
 
@@ -55,6 +58,16 @@ class UserModel(db.Document):
 
     def allowed(self, access_level: Roles) -> bool:
         return ACCESS_LEVEL[self.role] >= ACCESS_LEVEL[access_level.value]
+
+    def send_reset_password_mail(self) -> str:
+        # Genereate temporary access token for password resetting
+        token = create_access_token(identity=self.id)
+        reset_url = "{url}/reset_password?access_token={token}".format(
+            url=current_app.config["PREFERRED_URL_SCHEME"], token=token
+        )
+        print(token)
+        send_reset_password_mail(self.email, reset_url=reset_url)
+        return token
 
     @classmethod
     def find_by_id(cls, user_id: str) -> UserModel:

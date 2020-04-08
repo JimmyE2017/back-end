@@ -1,13 +1,21 @@
-from flask_jwt_extended import create_access_token, get_raw_jwt
+from flask_jwt_extended import create_access_token, decode_token, get_raw_jwt
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.common.errors import (
-    UNSUCCESSFUL_LOGIN_EMAIL_NOT_FOUND,
-    UNSUCCESSFUL_LOGIN_WRONG_PASSWORD,
+    EMAIL_NOT_FOUND_ERROR,
+    ENTITY_NOT_FOUND_ERROR,
+    INVALID_PASSWORD_ERROR,
     USER_ALREADY_EXISTS_ERROR,
+    BaseError,
+    ErrorType,
 )
 from app.models.user_model import BlacklistTokenModel, Roles, UserModel
-from app.schemas.user_schemas import LoginSchema, UserSchema
+from app.schemas.user_schemas import (
+    ForgottenPasswordSchema,
+    LoginSchema,
+    NewPasswordSchema,
+    UserSchema,
+)
 
 
 def login(data: bytes) -> (dict, int):
@@ -19,10 +27,10 @@ def login(data: bytes) -> (dict, int):
     user = UserModel.find_by_email(email=data["email"])
 
     if user is None:
-        return UNSUCCESSFUL_LOGIN_EMAIL_NOT_FOUND.get_error()
+        return EMAIL_NOT_FOUND_ERROR.get_error()
 
     if not check_password_hash(pwhash=user.password, password=data["password"]):
-        return UNSUCCESSFUL_LOGIN_WRONG_PASSWORD.get_error()
+        return INVALID_PASSWORD_ERROR.get_error()
 
     access_token = create_access_token(identity=user.id, fresh=True)
 
@@ -33,6 +41,49 @@ def logout() -> (dict, int):
     jti = get_raw_jwt()["jti"]
     blacklisted_token = BlacklistTokenModel(token=jti)
     blacklisted_token.save(force_insert=True)  # Inserting in DB
+
+    return None, 204
+
+
+def forgotten_password(data: bytes) -> (dict, int):
+    # Deserialize data
+    data, err_msg, err_code = ForgottenPasswordSchema().loads_or_400(data)
+    if err_msg:
+        return err_msg, err_code
+
+    # Get user from email
+    user = UserModel.find_by_email(email=data["email"])
+    if user is None:
+        return EMAIL_NOT_FOUND_ERROR.get_error()
+
+    user.send_reset_password_mail()
+
+    return None, 204
+
+
+def update_password(params: dict, data: bytes) -> (None, int):
+    # Validate and decode access token
+    if "access_token" not in params:
+        error = BaseError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Missing access token. You must add an access_token parameter",
+            401,
+        )
+        return error.get_error()
+    token = params.get("access_token")
+    decoded_token = decode_token(token)
+
+    user = UserModel.find_by_id(user_id=decoded_token.get("identity"))
+    if user is None:
+        return ENTITY_NOT_FOUND_ERROR.get_error()
+
+    # Load new password
+    data, err_msg, err_code = NewPasswordSchema().loads_or_400(data)
+    if err_msg:
+        return err_msg, err_code
+
+    user.password = generate_password_hash(data["password"])
+    user.save()
 
     return None, 204
 
