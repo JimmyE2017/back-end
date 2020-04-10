@@ -5,7 +5,6 @@ from enum import Enum
 
 from flask import current_app
 from flask_jwt_extended import create_access_token
-from mongoengine import QuerySet
 
 from app.common.mail.mail_services import send_reset_password_mail
 from app.common.uuid_generator import generate_id
@@ -15,14 +14,14 @@ from app.models import db
 class Roles(Enum):
     GUEST = "guest"
     PARTICIPANT = "participant"
-    MODERATOR = "moderator"
+    COACH = "coach"
     ADMIN = "admin"
 
 
 ACCESS_LEVEL = {
     Roles.GUEST.value: 0,
     Roles.PARTICIPANT.value: 1,  # Not used yet
-    Roles.MODERATOR.value: 2,
+    Roles.COACH.value: 2,
     Roles.ADMIN.value: 3,
 }
 
@@ -42,14 +41,19 @@ class BlacklistTokenModel(db.Document):
 
 
 class UserModel(db.Document):
-    meta = {"collection": "users"}
+    """
+    This is an abstract class.
+    Please inherit from it if you want to create a new type of user
+    """
+
+    meta = {"collection": "users", "allow_inheritance": True}
 
     userId = db.StringField(primary_key=True, default=generate_id)
     firstName = db.StringField(required=True, max_length=64, min_length=1)
     lastName = db.StringField(required=True, max_length=64, min_length=1)
     email = db.StringField(required=True, max_length=256, unique=True)
-    password = db.StringField(required=True)
-    role = db.StringField(required=True, max_length=32)
+    password = db.StringField()
+    role = db.ListField(db.StringField(max_length=32), required=True)
     createdAt = db.DateTimeField(default=datetime.datetime.utcnow)
     updatedAt = db.DateTimeField(default=datetime.datetime.utcnow)
 
@@ -57,7 +61,10 @@ class UserModel(db.Document):
         return f"<User {self.userId}>"
 
     def allowed(self, access_level: Roles) -> bool:
-        return ACCESS_LEVEL[self.role] >= ACCESS_LEVEL[access_level.value]
+        return (
+            max([ACCESS_LEVEL[r] for r in self.role])
+            >= ACCESS_LEVEL[access_level.value]
+        )
 
     def send_reset_password_mail(self) -> str:
         # Genereate temporary access token for password resetting
@@ -84,7 +91,3 @@ class UserModel(db.Document):
         except db.DoesNotExist:
             user = None
         return user
-
-    @classmethod
-    def find_all_moderators(cls) -> QuerySet:
-        return cls.objects(role__in=[Roles.ADMIN.value, Roles.MODERATOR.value]).all()

@@ -7,7 +7,8 @@ from werkzeug.security import generate_password_hash
 from app import create_app
 from app.common.mail import mail as _mail
 from app.models import db as _db
-from app.models.user_model import UserModel
+from app.models.coach_model import CoachModel
+from app.models.user_model import Roles
 
 
 @pytest.fixture(scope="session")
@@ -61,12 +62,12 @@ def init_admin(db, request):
     Create an admin for the scope of a function
     Remove it at the end
     """
-    admin = UserModel(
+    admin = CoachModel(
         firstName="admin_first_name",
         lastName="admin_last_name",
         email="admin@test.com",
         password=generate_password_hash("password"),
-        role="admin",
+        role=[Roles.ADMIN.value, Roles.COACH.value],
     )
 
     admin.save()
@@ -80,23 +81,23 @@ def init_admin(db, request):
 
 
 @pytest.fixture(scope="function")
-def init_moderator(db, request):
-    moderator = UserModel(
-        firstName="moderator_first_name",
-        lastName="moderator_last_name",
-        email="moderator@test.com",
+def init_coach(db, request):
+    coach = CoachModel(
+        firstName="coach_first_name",
+        lastName="coach_last_name",
+        email="coach@test.com",
         password=generate_password_hash("password"),
-        role="moderator",
+        role=[Roles.COACH.value],
     )
 
-    moderator.save()
+    coach.save()
 
-    # Delete moderator at the end
+    # Delete coach at the end
     def teardown():
-        moderator.delete()
+        coach.delete()
 
     request.addfinalizer(teardown)
-    return moderator
+    return coach
 
 
 class AuthActions(object):

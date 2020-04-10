@@ -1,5 +1,5 @@
 from app.api.ping import PingView
-from app.api.v1.moderator_views import ModeratorListView, ModeratorView
+from app.api.v1.coach_views import CoachListView, CoachView
 from app.api.v1.user_views import (
     ForgottenPasswordView,
     LoginView,
@@ -24,15 +24,15 @@ urlpatterns = [
         methods=["POST"],
     ),
     dict(
-        view=ModeratorListView,
-        url="/api/v1/moderators",
-        endpoint="moderator-list",
+        view=CoachListView,
+        url="/api/v1/coaches",
+        endpoint="coach-list",
         methods=["GET", "POST"],
     ),
     dict(
-        view=ModeratorView,
-        url="/api/v1/moderators/<string:moderator_id>",
-        endpoint="moderator",
+        view=CoachView,
+        url="/api/v1/coaches/<string:coach_id>",
+        endpoint="coach",
         methods=["DELETE"],
     ),
 ]

@@ -106,36 +106,36 @@ def test_with_revoked_token(client, auth, init_admin):
     assert status_code == RevokedTokenError.code
 
 
-def test_access_level_too_low(client, auth, init_moderator):
-    headers = auth.login(email="moderator@test.com")
+def test_access_level_too_low(client, auth, init_coach):
+    headers = auth.login(email="coach@test.com")
 
     # Try to access admin level endpoint
-    response = client.post("/api/v1/moderators", headers=headers, data=json.dumps({}))
+    response = client.post("/api/v1/coaches", headers=headers, data=json.dumps({}))
     response_data, status_code = json.loads(response.data), response.status_code
 
     assert status_code == PermissionDeniedError.code
     assert response_data == PermissionDeniedError().get_content()
 
 
-def test_good_access_level(client, auth, init_moderator):
-    headers = auth.login(email="moderator@test.com")
+def test_good_access_level(client, auth, init_coach):
+    headers = auth.login(email="coach@test.com")
 
     # Try to access admin level endpoint
-    response = client.get("/api/v1/moderators", headers=headers)
+    response = client.get("/api/v1/coaches", headers=headers)
 
     assert response.status_code == 200
 
 
-def test_forgotten_password_mail_sent(client, mail, init_moderator):
+def test_forgotten_password_mail_sent(client, mail, init_coach):
     with mail.record_messages() as outbox:
-        data = {"email": init_moderator.email}
+        data = {"email": init_coach.email}
         response = client.post("/api/v1/forgotten_password", data=json.dumps(data))
         assert response.status_code == 204
         assert len(outbox) == 1
         assert outbox[0].subject == password_reset_schema["subject"]
 
 
-def test_forgotten_password_invalid_data(client, init_moderator):
+def test_forgotten_password_invalid_data(client, init_coach):
     data = {"email": "nonexistingemail@test.com"}
 
     response = client.post("/api/v1/forgotten_password", data=json.dumps(data))
@@ -145,25 +145,25 @@ def test_forgotten_password_invalid_data(client, init_moderator):
     assert response_data == EmailNotFoundError().get_content()
 
 
-def test_reset_password(client, init_moderator):
+def test_reset_password(client, init_coach):
     data = {"password": "new_password"}
 
-    token = init_moderator.send_reset_password_mail()
+    token = init_coach.send_reset_password_mail()
 
     response = client.post(
         "/api/v1/reset_password",
         data=json.dumps(data),
         query_string={"access_token": token},
     )
-    init_moderator = UserModel.find_by_id(user_id=init_moderator.id)
+    init_coach = UserModel.find_by_id(user_id=init_coach.id)
     assert response.status_code == 204
-    assert check_password_hash(pwhash=init_moderator.password, password="new_password")
+    assert check_password_hash(pwhash=init_coach.password, password="new_password")
 
 
-def test_reset_password_invalid_token(client, init_moderator):
+def test_reset_password_invalid_token(client, init_coach):
     data = {"password": "new_d"}  # Password too short
 
-    init_moderator.send_reset_password_mail()
+    init_coach.send_reset_password_mail()
 
     response = client.post(
         "/api/v1/reset_password",
@@ -176,10 +176,10 @@ def test_reset_password_invalid_token(client, init_moderator):
     assert response_data == InvalidTokenError().get_content()
 
 
-def test_reset_password_invalid_new_password(client, init_moderator):
+def test_reset_password_invalid_new_password(client, init_coach):
     data = {"password": "new_d"}  # Password too short
 
-    token = init_moderator.send_reset_password_mail()
+    token = init_coach.send_reset_password_mail()
 
     response = client.post(
         "/api/v1/reset_password",
