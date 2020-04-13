@@ -21,7 +21,7 @@ class Workshop(db.Document):
     creatorId = db.ReferenceField(UserModel, reverse_delete_rule=NULLIFY)
     coachId = db.ReferenceField(UserModel, reverse_delete_rule=NULLIFY)
     eventUrl = db.StringField(default='caplc.com')
-    location = db.StringField(required=True, max_length=256, min_length=1, default='CAPLC')
+    location = db.StringField(required=True, max_length=256, mfrpin_length=1, default='CAPLC')
 
     def __repr__(self):
         return f"<Workshop {self.workshopId} | {self.title} - animated by {self.coachId} at {self.location} on {self.startAt.strftime('%d/%m/%y')}>"
@@ -37,7 +37,7 @@ class Workshop(db.Document):
     @classmethod
     def find_by_coach_id(cls, coach_id: str) -> Workshop:
         try:
-            workshop = cls.objects.get(coachId=coach_id)
+            workshops = cls.objects(coachId=coach_id)
         except db.DoesNotExist:
-            workshop = None
-        return workshop
+            workshops = None
+        return workshops

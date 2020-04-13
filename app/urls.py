@@ -1,5 +1,6 @@
 from app.api.ping import PingView
 from app.api.v1.coach_views import CoachListView, CoachView
+from app.api.v1.workshop_views import WorkshopView, WorkshopListView
 from app.api.v1.user_views import (
     ForgottenPasswordView,
     LoginView,
@@ -34,5 +35,23 @@ urlpatterns = [
         url="/api/v1/coaches/<string:coach_id>",
         endpoint="coach",
         methods=["DELETE"],
+    ),
+    dict(
+        view=WorkshopListView,
+        url="/api/v1/workshops/<string:coach_id>",
+        endpoint="workshop-list",
+        methods=["GET"],
+    ),
+    dict(
+        view=WorkshopView,
+        url="/api/v1/workshop/<string:workshop_id>",
+        endpoint="workshop",
+        methods=["GET","DELETE"],
+    ),
+    dict(
+        view=WorkshopView,
+        url="/api/v1/workshop",
+        endpoint="create-workshop",
+        methods=["POST"],
     ),
 ]
