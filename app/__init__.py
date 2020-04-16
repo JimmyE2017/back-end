@@ -7,6 +7,7 @@ from mongoengine.base.document import BaseDocument
 from mongoengine.fields import DBRef, ObjectId
 from mongoengine.queryset.base import BaseQuerySet
 
+from app.cli import cli_commands
 from app.common.errors import CustomException
 
 from .config import config_by_name
@@ -73,5 +74,8 @@ def create_app(config_name="dev"):
     # Routing
     for urlpattern in urlpatterns:
         _register_view(app, **urlpattern)
+
+    for cli_cmd in cli_commands:
+        app.cli.add_command(cli_cmd)
 
     return app

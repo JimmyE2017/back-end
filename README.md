@@ -104,13 +104,15 @@ $ curl 127.0.0.1:5000/api/ping
 }
 ```
 
-Adding an admin (Can only be done through shell currently)
+Adding an admin
 ```shell script
-$ flask shell
->>> import json
->>> from app.services.coach_services import create_admin_user
->>> data = {"email": "admin@test.com", "password":"password", "firstName": "First name", "lastName": "Last Name"}
->>> create_admin_user(json.dumps(data))
+$ flask create_admin
+User first name [admin]:
+User last name [user]:
+Email [admin@test.com]:
+Password:
+Repeat for confirmation:
+Admin User admin@test.com created.
 ```
 
 ## Contributing
