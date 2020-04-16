@@ -16,13 +16,6 @@ class Config:
     JWT_BLACKLIST_TOKEN_CHECKS = ["access"]
     JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(days=2)
 
-    # Flask-MongoEngine
-    MONGODB_USERNAME = os.getenv("MONGODB_USERNAME")
-    MONGODB_PASSWORD = os.getenv("MONGODB_PASSWORD")
-    MONGODB_DB = os.getenv("MONGODB_DB")
-    MONGODB_HOST = os.getenv("MONGODB_HOST")
-    MONGODB_PORT = int(os.getenv("MONGODB_PORT"))
-
     # Flask Mail
     MAIL_SERVER = os.getenv("MAIL_SERVER")
     MAIL_PORT = int(os.getenv("MAIL_PORT"))
@@ -34,21 +27,42 @@ class Config:
     MAIL_SUPPRESS_SEND = True  # Prevent from sending email
 
 
+class LocalConfig(Config):
+    DEBUG = True
+    MONGODB_USERNAME = os.getenv("MONGODB_USERNAME")
+    MONGODB_PASSWORD = os.getenv("MONGODB_PASSWORD")
+    MONGODB_DB = os.getenv("MONGODB_DB")
+    MONGODB_HOST = os.getenv("MONGODB_HOST")
+    MONGODB_PORT = int(os.getenv("MONGODB_PORT"))
+
+
 class DevelopmentConfig(Config):
     DEBUG = True
+    MONGODB_USERNAME = os.getenv("MONGODB_USERNAME")
+    MONGODB_PASSWORD = os.getenv("MONGODB_PASSWORD")
+    MONGODB_DB = os.getenv("MONGODB_DB")
+    MONGODB_HOST = os.getenv("MONGODB_HOST")
+    MONGODB_PORT = int(os.getenv("MONGODB_PORT"))
 
 
 class TestingConfig(Config):
     DEBUG = True
     TESTING = True
-    MONGODB_DB = Config.MONGODB_DB + "Test"
+    MONGODB_SETTINGS = {"db": "test", "host": "mongomock://localhost"}
 
 
 class ProductionConfig(Config):
     DEBUG = False
     MAIL_SUPPRESS_SEND = False
+    MONGODB_USERNAME = os.getenv("MONGODB_USERNAME")
+    MONGODB_PASSWORD = os.getenv("MONGODB_PASSWORD")
+    MONGODB_DB = os.getenv("MONGODB_DB")
+    MONGODB_HOST = os.getenv("MONGODB_HOST")
+    MONGODB_PORT = int(os.getenv("MONGODB_PORT"))
 
 
-config_by_name = dict(dev=DevelopmentConfig, test=TestingConfig, prod=ProductionConfig)
+config_by_name = dict(
+    local=LocalConfig, dev=DevelopmentConfig, test=TestingConfig, prod=ProductionConfig
+)
 
 key = Config.SECRET_KEY
