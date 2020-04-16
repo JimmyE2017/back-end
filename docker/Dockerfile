@@ -1,8 +1,11 @@
-FROM python:3.8
-ARG API_HOME=/usr/src/app
+FROM python:3.8-slim
+ARG API_HOME=/usr/src
 
-ADD . ${API_HOME}
+COPY . ${API_HOME}
+
 WORKDIR ${API_HOME}
-EXPOSE 5000
+
 RUN pip install --upgrade pip \
     && pip install -r ${API_HOME}/requirements.txt
+
+EXPOSE 5000

@@ -38,9 +38,11 @@ def db(app, request):
     """Session-wide test database."""
     _db.app = app
 
+    # Add init DB here
+
     def teardown():
         me = get_db()
-        db_name = app.config["MONGODB_DB"]
+        db_name = "test"
         for collection in me.client.get_database(db_name).list_collection_names():
             me.client.get_database(db_name).drop_collection(collection)
 

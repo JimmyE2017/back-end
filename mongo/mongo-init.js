@@ -14,17 +14,3 @@ db.createUser(
         ]
     }
 );
-
-db = db.getSiblingDB('caplcDBTest');
-db.createUser(
-    {
-        user: "caplc_user",
-        pwd: "password123",
-        roles: [
-            {
-                role: "readWrite",
-                db: "caplcDBTest"
-            }
-        ]
-    }
-);

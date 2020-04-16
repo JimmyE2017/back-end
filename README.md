@@ -2,7 +2,7 @@
 ## Introduction
 Project holding the back-end implementation of CAPLC.
 
-## Setup
+## Local Setup
 
 ### Setup code
 Create organisation directory
@@ -34,7 +34,7 @@ Install pre-commit
 ```shell script
 pre-commit install
 ```
-## Setting up environment variables
+### Setting up environment variables
 Project is configured using environment variables in the following files.
 - `venv/local.env`
 - `venv/development.env`
@@ -57,14 +57,14 @@ once you open another terminal
 
 Add it your `.bashrc` if you want the variable to be exported everytime you open a terminal.
 
-## Setting up Mongo locally
+### Setting up Mongo locally if needed
 Install [Docker](https://www.docker.com/get-started)
 
 Install [Docker Compose](https://docs.docker.com/compose/install/)
 
 Start Mongo container
 ```shell script
-$ docker-compose -f docker/docker-compose.mongo_only.yml up --build -d
+$ docker-compose -f mongo/docker-compose.mongo_only.yml up --build -d
 Creating mongo_caplc ... done
 ```
 
@@ -82,11 +82,11 @@ FYI, those credentials are currently hardcoded in the setup file `docker/mongo-i
 
 You may need to change it according to your `local.env` file
 
-## Running the server
-Locally
+### Running the server
+
 ```shell script
 $ flask run
- * Serving Flask app "app:create_app('dev')" (lazy loading)
+ * Serving Flask app "app:create_app('local')" (lazy loading)
  * Environment: development
  * Debug mode: on
  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)

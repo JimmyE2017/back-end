@@ -2,12 +2,12 @@ version: '3.7'
 
 services:
     api:
-        container_name: caplc_api
+        container_name: caplc_api_dev
         image: caplc_api:0.1.0
         ports:
-            - 5000:5000
+            - 5001:5000
         env_file:
-          - ../venv/production.env
+          - ../venv/development.env
         volumes:
             - ../app:/usr/src/app
         command: gunicorn --log-level info --access-logfile - --capture-output --access-logformat "%(h)s %(l)s %(u)s %(t)s \"%(r)s\" %(s)s %(D)s %(b)s \"%(f)s\" \"%(a)s\"" --workers 1 --bind 0.0.0.0:5000 wsgi:app
