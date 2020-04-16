@@ -34,6 +34,12 @@ def client(app):
 
 
 @pytest.fixture(scope="session")
+def cli_runner(app):
+    """A test cli runner for the app."""
+    return app.test_cli_runner()
+
+
+@pytest.fixture(scope="session")
 def db(app, request):
     """Session-wide test database."""
     _db.app = app
