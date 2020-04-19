@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash
 from app import create_app
 from app.common.mail import mail as _mail
 from app.models import db as _db
+from app.models.city_model import Cities
 from app.models.coach_model import CoachModel
 from app.models.user_model import Roles
 
@@ -76,6 +77,7 @@ def init_admin(db, request):
         email="admin@test.com",
         password=generate_password_hash("password"),
         role=[Roles.ADMIN.value, Roles.COACH.value],
+        city=Cities.PARIS.value,
     )
 
     admin.save()
@@ -96,6 +98,7 @@ def init_coach(db, request):
         email="coach@test.com",
         password=generate_password_hash("password"),
         role=[Roles.COACH.value],
+        city=Cities.PARIS.value,
     )
 
     coach.save()

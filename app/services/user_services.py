@@ -7,7 +7,8 @@ from app.common.errors import (
     InvalidPasswordError,
     InvalidTokenError,
 )
-from app.models.user_model import BlacklistTokenModel, UserModel
+from app.models.user_model import BlacklistTokenModel, Roles, UserModel
+from app.schemas.coach_schemas import CoachSchema
 from app.schemas.user_schemas import (
     ForgottenPasswordSchema,
     LoginSchema,
@@ -29,9 +30,14 @@ def login(data: bytes) -> (dict, int):
     if not check_password_hash(pwhash=user.password, password=data["password"]):
         raise InvalidPasswordError
 
+    # Generate access token
     access_token = create_access_token(identity=user.id, fresh=True)
+    output_data = {"access_token": access_token}
 
-    return {"access_token": access_token}, 200
+    # Provide Coach info in addition to access token
+    if Roles.COACH.value in user.role:
+        output_data.update(CoachSchema().dump(user))
+    return output_data, 200
 
 
 def logout() -> (dict, int):
