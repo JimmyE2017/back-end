@@ -2,7 +2,11 @@ import json
 
 import pytest
 
-from app.common.errors import EmptyBodyError, UserAlreadyExistsError
+from app.common.errors import (
+    EmptyBodyError,
+    EntityNotFoundError,
+    UserAlreadyExistsError,
+)
 from app.models.city_model import Cities
 from app.models.coach_model import CoachModel
 from app.models.user_model import Roles
@@ -155,6 +159,17 @@ def create_some_coaches(db, request):
 
 @pytest.mark.usefixtures("create_some_coaches")
 class TestCoachRessourcesWithExistingData:
+    def test_get_coach(self, client, auth, init_coach):
+        headers = auth.login(email="coach@test.com")
+
+        response = client.get(
+            "/api/v1/coaches/{}".format(init_coach.id), headers=headers
+        )
+        response_data, status_code = json.loads(response.data), response.status_code
+
+        assert status_code == 200
+        assert response_data["email"] == "coach@test.com"
+
     def test_get_coaches(self, client, auth, init_admin):
         headers = auth.login(email="admin@test.com")
 
@@ -205,6 +220,15 @@ def test_delete_coaches(client, auth, init_admin, request):
         coach.delete()
 
     request.addfinalizer(teardown)
+
+
+def test_get_inexisting_coach(client, auth, init_admin):
+    headers = auth.login(email="admin@test.com")
+
+    response = client.get("/api/v1/coaches/inexistingId", headers=headers)
+    response_data, status_code = json.loads(response.data), response.status_code
+    assert status_code == EntityNotFoundError.code
+    assert response_data == EntityNotFoundError().get_content()
 
 
 @pytest.mark.parametrize("data", valid_coach_data)

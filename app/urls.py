@@ -5,12 +5,14 @@ from app.api.v1.user_views import (
     LoginView,
     LogoutView,
     ResetPasswordView,
+    UserMeView,
 )
 
 urlpatterns = [
     dict(view=PingView, url="/api/ping", endpoint="ping", methods=["GET"]),
     dict(view=LoginView, url="/api/v1/login", endpoint="login", methods=["POST"]),
     dict(view=LogoutView, url="/api/v1/logout", endpoint="logout", methods=["DELETE"]),
+    dict(view=UserMeView, url="/api/v1/users/me", endpoint="get-me", methods=["GET"]),
     dict(
         view=ForgottenPasswordView,
         url="/api/v1/forgotten_password",
@@ -33,6 +35,6 @@ urlpatterns = [
         view=CoachView,
         url="/api/v1/coaches/<string:coach_id>",
         endpoint="coach",
-        methods=["DELETE"],
+        methods=["GET", "DELETE"],
     ),
 ]

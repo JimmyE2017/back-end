@@ -188,3 +188,13 @@ def test_reset_password_invalid_new_password(client, init_coach):
     )
 
     assert response.status_code == InvalidDataError.code
+
+
+def test_user_me(client, auth, init_coach):
+    headers = auth.login(email="coach@test.com")
+    # Try to access admin level endpoint
+    response = client.get("/api/v1/users/me", headers=headers)
+    response_data, status_code = json.loads(response.data), response.status_code
+
+    assert status_code == 200
+    assert response_data["email"] == "coach@test.com"

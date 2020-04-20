@@ -4,7 +4,12 @@ from flask_jwt_extended import jwt_required
 
 from app.common.access_level import requires_access_level
 from app.models.user_model import Roles
-from app.services.coach_services import create_coach, delete_coach, get_all_coachs
+from app.services.coach_services import (
+    create_coach,
+    delete_coach,
+    get_all_coachs,
+    get_coach,
+)
 
 
 class CoachListView(MethodView):
@@ -27,4 +32,10 @@ class CoachView(MethodView):
     @requires_access_level(Roles.ADMIN)
     def delete(self, coach_id):
         response, code = delete_coach(coach_id)
+        return make_response(jsonify(response), code)
+
+    @jwt_required
+    @requires_access_level(Roles.COACH)
+    def get(self, coach_id):
+        response, code = get_coach(coach_id)
         return make_response(jsonify(response), code)

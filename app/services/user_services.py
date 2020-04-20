@@ -1,4 +1,9 @@
-from flask_jwt_extended import create_access_token, decode_token, get_raw_jwt
+from flask_jwt_extended import (
+    create_access_token,
+    decode_token,
+    get_jwt_identity,
+    get_raw_jwt,
+)
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.common.errors import (
@@ -34,9 +39,6 @@ def login(data: bytes) -> (dict, int):
     access_token = create_access_token(identity=user.id, fresh=True)
     output_data = {"access_token": access_token}
 
-    # Provide Coach info in addition to access token
-    if Roles.COACH.value in user.role:
-        output_data.update(CoachSchema().dump(user))
     return output_data, 200
 
 
@@ -46,6 +48,21 @@ def logout() -> (dict, int):
     blacklisted_token.save(force_insert=True)  # Inserting in DB
 
     return None, 204
+
+
+def get_me() -> (dict, int):
+    current_user_id = get_jwt_identity()
+
+    current_user = UserModel().find_by_id(user_id=current_user_id)
+
+    if current_user is None:
+        raise EntityNotFoundError
+
+    output_data = {}
+    if Roles.COACH.value in current_user.role:
+        output_data = CoachSchema().dump(current_user)
+
+    return output_data, 200
 
 
 def forgotten_password(data: bytes) -> (dict, int):
