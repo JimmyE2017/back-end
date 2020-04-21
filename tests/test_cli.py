@@ -30,3 +30,20 @@ def test_create_admin(cli_runner, db, request):
         user.delete()
 
     request.addfinalizer(teardown)
+
+
+def test_create_admin_already_existing(cli_runner, init_admin):
+    first_name = "admin first name"
+    last_name = "admin last name"
+    email = "admin@test.com"
+    password = "password"
+
+    input_stream = ""
+    input_stream += first_name + "\n"  # First name
+    input_stream += last_name + "\n"  # Last name
+    input_stream += email + "\n"  # Email
+    input_stream += password + "\n"  # Password
+    input_stream += password + "\n"  # Password confirmation
+
+    result = cli_runner.invoke(create_admin, input=input_stream)
+    assert "Issue when creating admin." in result.output
