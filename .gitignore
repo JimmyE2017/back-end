@@ -24,6 +24,12 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# Unit test / coverage reports
+.coverage
+.coverage.*
+coverage.xml
+.pytest_cache
+
 # Jupyter Notebook
 .ipynb_checkpoints
 
