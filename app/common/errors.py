@@ -91,9 +91,3 @@ class EmptyBodyError(CustomException):
     error_type = ErrorType.INVALID_DATA_ERROR
     msg = "Body should not be empty."
     code = 400
-
-
-class AdminDeletionError(CustomException):
-    error_type = ErrorType.INVALID_DATA_ERROR
-    msg = "Admin user can't be deleted."
-    code = 409

@@ -4,7 +4,9 @@ import click
 from flask.cli import with_appcontext
 
 from app.common.errors import CustomException
-from app.services.coach_services import create_admin_user
+from app.models.city_model import Cities
+from app.models.user_model import Roles
+from app.services.coach_services import create_coach
 
 
 @click.command("create_admin")
@@ -22,9 +24,11 @@ def create_admin(firstname, lastname, email, password):
         "password": password,
         "firstName": firstname,
         "lastName": lastname,
+        "role": Roles.ADMIN.value,
+        "city": Cities.PARIS.value,
     }
     try:
-        create_admin_user(data=json.dumps(data))
+        create_coach(data=json.dumps(data))
     except CustomException as e:
         click.echo(click.style("Issue when creating admin.", fg="red"))
         click.echo(json.dumps(e.get_content(), indent=2))

@@ -4,7 +4,7 @@ from app.cli import create_admin
 from app.models.user_model import UserModel
 
 
-def test_create_admin(cli_runner, db):
+def test_create_admin(cli_runner, db, request):
     first_name = "admin first name"
     last_name = "admin last name"
     email = "admin@test.com"
@@ -25,3 +25,8 @@ def test_create_admin(cli_runner, db):
     assert user.firstName == first_name
     assert user.lastName == last_name
     assert check_password_hash(pwhash=user.password, password=password)
+
+    def teardown():
+        user.delete()
+
+    request.addfinalizer(teardown)

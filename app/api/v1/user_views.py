@@ -4,6 +4,7 @@ from flask_jwt_extended import jwt_required
 
 from app.services.user_services import (
     forgotten_password,
+    get_me,
     login,
     logout,
     update_password,
@@ -21,6 +22,13 @@ class LogoutView(MethodView):
     @jwt_required
     def delete(self):
         response, code = logout()
+        return make_response(jsonify(response), code)
+
+
+class UserMeView(MethodView):
+    @jwt_required
+    def get(self):
+        response, code = get_me()
         return make_response(jsonify(response), code)
 
 
