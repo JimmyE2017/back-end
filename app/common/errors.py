@@ -21,9 +21,6 @@ class CustomException(Exception):
             content.update({"details": self.details})
         return content
 
-    def get_error(self) -> (dict, int):
-        return self.get_content(), self.code
-
 
 # Authorization Errors
 class UnauthorizedTokenError(CustomException):

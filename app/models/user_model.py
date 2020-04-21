@@ -57,8 +57,11 @@ class UserModel(db.Document):
     createdAt = db.DateTimeField(default=datetime.datetime.utcnow)
     updatedAt = db.DateTimeField(default=datetime.datetime.utcnow)
 
+    def __str__(self):
+        return f"User {self.userId} - {self.firstName} {self.lastName}"
+
     def __repr__(self):
-        return f"<User {self.userId}>"
+        return f"<User {self.userId} - {self.firstName} {self.lastName}>"
 
     def allowed(self, access_level: Roles) -> bool:
         return (

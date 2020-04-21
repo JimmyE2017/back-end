@@ -160,3 +160,10 @@ python -m pytest tests/ (all tests)
 python -m pytest tests/test_sample.py (single test file)
 python -m pytest tests/utils/test_sample.py::test_answer_correct (single test method)
 ```
+
+### Testing coverage
+```shell script
+$ coverage run -m pytest
+...
+$ coverage report -m
+```

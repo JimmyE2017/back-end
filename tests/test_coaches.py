@@ -222,6 +222,16 @@ def test_delete_coaches(client, auth, init_admin, request):
     request.addfinalizer(teardown)
 
 
+def test_delete_inexisting_coach(client, auth, init_admin):
+
+    headers = auth.login(email="admin@test.com")
+    response = client.delete(f"/api/v1/coaches/inexistingId", headers=headers)
+
+    response_data, status_code = json.loads(response.data), response.status_code
+    assert status_code == EntityNotFoundError.code
+    assert response_data == EntityNotFoundError().get_content()
+
+
 def test_get_inexisting_coach(client, auth, init_admin):
     headers = auth.login(email="admin@test.com")
 

@@ -28,12 +28,12 @@ def create_admin(firstname, lastname, email, password):
         "city": Cities.PARIS.value,
     }
     try:
-        create_coach(data=json.dumps(data))
+        user, _ = create_coach(data=json.dumps(data))
     except CustomException as e:
         click.echo(click.style("Issue when creating admin.", fg="red"))
         click.echo(json.dumps(e.get_content(), indent=2))
-        return
-    click.echo(click.style("Admin User {0} created.".format(email), fg="green"))
+        raise e
+    click.echo(click.style("{0} created.".format(str(user)), fg="green"))
 
     return
 
