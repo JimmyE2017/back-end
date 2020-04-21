@@ -27,12 +27,12 @@ cd back-end
 
 Install requirements
 ```shell script
-pip install -r requirements.txt
+pip install -e .
 ```
 
-Install pre-commit
+Install dev requirements
 ```shell script
-pre-commit install
+pip install -e .[dev]
 ```
 ### Setting up environment variables
 Project is configured using environment variables in the following files.
