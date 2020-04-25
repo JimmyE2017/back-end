@@ -27,13 +27,9 @@ cd back-end
 
 Install requirements
 ```shell script
-pip install -e .
+pip install -c requirements.txt
 ```
 
-Install dev requirements
-```shell script
-pip install -e .[dev]
-```
 ### Setting up environment variables
 Project is configured using environment variables in the following files.
 - `venv/local.env`
@@ -151,6 +147,11 @@ Files :
 - `app/__init__.py` holds the `create_app` method for the application factory
 - `manage.py` defines the CLI commands
 
+### Installing extra dependancies
+```shell script
+pip install -c dev-requirements
+```
+
 ### Running test
 We are using pytest, so simply executes one of the following
 ```shell script
@@ -164,6 +165,19 @@ python -m pytest tests/utils/test_sample.py::test_answer_correct (single test me
 ### Testing coverage
 ```shell script
 $ coverage run -m pytest
-...
 $ coverage report -m
+```
+### Adding a dependancy
+We use [pip-tools](https://github.com/jazzband/pip-tools) to manage dependancies.
+To add a new dependancy, add it to `requirements.in` for production-only dependancy.
+Then
+```shell script
+$ pip-compile requirements.in
+$ pip-sync requirements.txt
+```
+
+To add extra requirements intended for developers, add them in `dev-requirements.in`
+```shell script
+$ pip-compile dev-requirements.in
+$ pip-sync requirements.txt dev-requirements.txt
 ```
