@@ -1,0 +1,6 @@
+Flask
+Flask-JWT-Extended
+Flask-Mail
+flask-mongoengine
+gunicorn
+marshmallow

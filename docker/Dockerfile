@@ -6,6 +6,6 @@ COPY . ${API_HOME}
 WORKDIR ${API_HOME}
 
 RUN pip install --upgrade pip \
-    && pip install -e .
+    && pip install -c ${API_HOME}/requirements.txt
 
 EXPOSE 5000
