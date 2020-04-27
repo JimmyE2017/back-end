@@ -23,9 +23,6 @@ class CoachSchema(CustomSchema):
     workshopsCount = fields.Integer(default=0)
     awarenessRaisedCount = fields.Integer(default=0)
 
-    class Meta:
-        ordering = True
-
     @pre_dump
     def stringify_role(self, in_data, **kwargs):
         in_data["role"] = max(
