@@ -1,12 +1,16 @@
+import csv
 import json
 
 import click
 from flask.cli import with_appcontext
 
 from app.common.errors import CustomException
+from app.models.action_card_model import ActionCardModel
 from app.models.city_model import Cities
 from app.models.user_model import Roles
 from app.services.coach_services import create_coach
+
+MODELS_WITH_ENABLED_IMPORTCSV = {"actionCards": ActionCardModel}
 
 
 @click.command("create_admin")
@@ -38,4 +42,57 @@ def create_admin(firstname, lastname, email, password):
     return
 
 
-cli_commands = [create_admin]
+@click.command("importcsv")
+@click.option(
+    "--drop/--no-drop",
+    default=False,
+    help="Whether to drop the collection beforehand or not",
+)
+@click.argument("collection")
+@click.argument("csv_file", type=click.Path(exists=True))
+def importcsv(collection, csv_file, drop):
+    """ Import a CSV file into a given collection
+
+    COLLECTION is the name of the target mongo collection
+
+    CSV_FILE is the path to the file
+
+    CSV delimiter should be a comma and lines separeted by newline
+    """
+    if collection not in MODELS_WITH_ENABLED_IMPORTCSV:
+        click.echo(
+            click.style(
+                "Collection {} does not support importcsv.".format(collection), fg="red"
+            )
+        )
+        click.echo(
+            "Only the following collections support import csv : {}".format(
+                ", ".join([c for c in MODELS_WITH_ENABLED_IMPORTCSV.keys()])
+            )
+        )
+        raise Exception("Collection {} does not support importcsv.".format(collection))
+
+    model = MODELS_WITH_ENABLED_IMPORTCSV[collection]
+
+    if drop:
+        click.echo("Dropping collection {}".format(collection))
+        model.drop_collection()
+    count = 0
+    with open(csv_file, "r") as fr:
+        reader = csv.DictReader(fr)
+        for row in reader:
+            data = model(**row)
+            data.save()
+            count += 1
+    click.echo(
+        click.style(
+            "Successfully inserted {} objects in collection {}".format(
+                count, collection
+            ),
+            fg="green",
+        )
+    )
+    return
+
+
+cli_commands = [create_admin, importcsv]

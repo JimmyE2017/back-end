@@ -38,3 +38,6 @@ venv/*.env
 
 # Pycharm stuff
 .idea/
+
+# CSV files
+ressources/csv/*.csv

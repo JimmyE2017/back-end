@@ -1,0 +1,4 @@
+number,title,category,type,key,sector,cost
+1,action_card_title_1,action_card_category_1,action_card_type_1,action_card_key_1,action_card_sector_1,1
+2,action_card_title_2,action_card_category_2,action_card_type_2,action_card_key_2,action_card_sector_2,2
+3,action_card_title_3,action_card_category_3,action_card_type_3,action_card_key_3,action_card_sector_3,3
