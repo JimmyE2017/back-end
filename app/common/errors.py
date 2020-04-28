@@ -68,7 +68,7 @@ class InvalidPasswordError(CustomException):
 
 class InvalidDataError(CustomException):
     error_type = ErrorType.INVALID_DATA_ERROR
-    msg = "Incorrect password."
+    msg = "Incorrect Data Error."
     code = 400
 
 
