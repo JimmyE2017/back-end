@@ -4,7 +4,7 @@ from csv import DictReader
 from werkzeug.security import check_password_hash
 
 from app.cli import create_admin, importcsv
-from app.models.action_card_model import ActionCardModel
+from app.models.action_card_model import ActionCardBatchModel, ActionCardModel
 from app.models.user_model import UserModel
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -131,5 +131,28 @@ def test_importcsv_with_drop(cli_runner, db, request):
 
     def teardown():
         ActionCardModel.drop_collection()
+
+    request.addfinalizer(teardown)
+
+
+def test_importcsv_with_list_fields(cli_runner, db, request):
+    collection = "actionCardBatches"
+    csv_file = "{}/ressources/csv/action_card_batches.csv.example".format(BASE_DIR)
+
+    count = 0
+    with open(csv_file, "r") as fr:
+        reader = DictReader(fr)
+        for _ in reader:
+            count += 1
+
+    result = cli_runner.invoke(importcsv, ["--drop", collection, csv_file])
+    assert (
+        "Successfully inserted {} objects in collection {}".format(count, collection)
+        in result.output
+    )
+    assert len(ActionCardBatchModel.objects()) == count
+
+    def teardown():
+        ActionCardBatchModel.drop_collection()
 
     request.addfinalizer(teardown)

@@ -1,6 +1,7 @@
 from werkzeug.security import generate_password_hash
 
 from app.common.errors import EntityNotFoundError, UserAlreadyExistsError
+from app.models.action_card_model import ActionCardBatchModel
 from app.models.coach_model import CoachModel
 from app.models.user_model import Roles
 from app.schemas.coach_schemas import CoachSchema
@@ -54,6 +55,17 @@ def create_coach(data: bytes) -> (dict, int):
 
     # Create user in DB
     user.save(force_insert=True)
+
+    # Generate default action card batches
+    default_action_card_batches = ActionCardBatchModel.find_default_batches()
+    for default_action_card_batch in default_action_card_batches:
+        ActionCardBatchModel(
+            coachId=user.id,
+            number=default_action_card_batch.number,
+            title=default_action_card_batch.title,
+            actionCardIds=default_action_card_batch.actionCardIds,
+            type=default_action_card_batch.type,
+        ).save()
 
     return schema.dump(user), 200
 
