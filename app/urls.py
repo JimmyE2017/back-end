@@ -1,5 +1,5 @@
 from app.api.ping import PingView
-from app.api.v1.action_card_views import ActionCardListView
+from app.api.v1.action_card_views import ActionCardBatchView, ActionCardListView
 from app.api.v1.coach_views import CoachListView, CoachView
 from app.api.v1.user_views import (
     ForgottenPasswordView,
@@ -43,5 +43,11 @@ urlpatterns = [
         url="/api/v1/action_cards",
         endpoint="action-cards-list",
         methods=["GET"],
+    ),
+    dict(
+        view=ActionCardBatchView,
+        url="/api/v1/coaches/<string:coach_id>/action_card_batches",
+        endpoint="action-cards-batch-list",
+        methods=["GET", "PUT"],
     ),
 ]

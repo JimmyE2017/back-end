@@ -5,12 +5,16 @@ import click
 from flask.cli import with_appcontext
 
 from app.common.errors import CustomException
-from app.models.action_card_model import ActionCardModel
+from app.models import db
+from app.models.action_card_model import ActionCardBatchModel, ActionCardModel
 from app.models.city_model import Cities
 from app.models.user_model import Roles
 from app.services.coach_services import create_coach
 
-MODELS_WITH_ENABLED_IMPORTCSV = {"actionCards": ActionCardModel}
+MODELS_WITH_ENABLED_IMPORTCSV = {
+    "actionCards": ActionCardModel,
+    "actionCardBatches": ActionCardBatchModel,
+}
 
 
 @click.command("create_admin")
@@ -40,6 +44,13 @@ def create_admin(firstname, lastname, email, password):
     click.echo(click.style("{0} created.".format(str(user)), fg="green"))
 
     return
+
+
+def _parse_row(row, model):
+    for k, v in row.items():
+        if isinstance(getattr(model, k), db.ListField):
+            row[k] = json.loads(v)
+    return row
 
 
 @click.command("importcsv")
@@ -81,7 +92,7 @@ def importcsv(collection, csv_file, drop):
     with open(csv_file, "r") as fr:
         reader = csv.DictReader(fr)
         for row in reader:
-            data = model(**row)
+            data = model(**_parse_row(row, model))
             data.save()
             count += 1
     click.echo(

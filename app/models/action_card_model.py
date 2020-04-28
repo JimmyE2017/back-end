@@ -5,12 +5,12 @@ from app.common.uuid_generator import generate_id
 from app.models import db
 
 
-class ActionCardCategory(Enum):
+class ActionCardType(Enum):
     INDIVIDUAL = "individual"
     COLLECTIVE = "collective"
 
 
-class ActionCardType(Enum):
+class ActionCardCategory(Enum):
     ECOFRIENDLY_ACTION = "eco-friendly action"
     AWARENESS = "awareness"
     SYSTEM = "system"
@@ -33,3 +33,29 @@ class ActionCardModel(db.Document):
     @classmethod
     def find_all(cls):
         return cls.objects().order_by("number")
+
+
+class ActionCardBatchModel(db.Document):
+    meta = {"collection": "actionCardBatches"}
+
+    actionCardBatchId = db.StringField(primary_key=True, default=generate_id)
+    coachId = db.StringField()
+    number = db.IntField(required=True, min_value=0)
+    title = db.StringField(required=True)
+    actionCardIds = db.ListField(db.StringField(), required=True)
+    type = db.StringField(required=True)
+    default = db.BooleanField()
+    createdAt = db.DateTimeField(default=datetime.datetime.utcnow)
+    updatedAt = db.DateTimeField(default=datetime.datetime.utcnow)
+
+    @classmethod
+    def get_default_batches(cls):
+        return cls.objects(default=True).all()
+
+    @classmethod
+    def find_default_batches(cls):
+        return cls.objects(default=True).all()
+
+    @classmethod
+    def find_action_card_batches_by_coach(cls, coach_id):
+        return cls.objects(coachId=coach_id).all()
