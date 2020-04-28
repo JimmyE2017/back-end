@@ -1,7 +1,6 @@
 from app.api.ping import PingView
 from app.api.v1.action_card_views import ActionCardBatchView, ActionCardListView
 from app.api.v1.coach_views import CoachListView, CoachView
-from app.api.v1.workshop_views import WorkshopView, WorkshopListView
 from app.api.v1.user_views import (
     ForgottenPasswordView,
     LoginView,
@@ -9,6 +8,7 @@ from app.api.v1.user_views import (
     ResetPasswordView,
     UserMeView,
 )
+from app.api.v1.workshop_views import WorkshopListView, WorkshopView
 
 urlpatterns = [
     dict(view=PingView, url="/api/ping", endpoint="ping", methods=["GET"]),
@@ -53,20 +53,14 @@ urlpatterns = [
     ),
     dict(
         view=WorkshopListView,
-        url="/api/v1/workshops/<string:coach_id>",
+        url="/api/v1/workshops",
         endpoint="workshop-list",
-        methods=["GET"],
+        methods=["GET", "POST"],
     ),
     dict(
         view=WorkshopView,
-        url="/api/v1/workshop/<string:workshop_id>",
+        url="/api/v1/workshops/<string:workshop_id>",
         endpoint="workshop",
-        methods=["GET","DELETE"],
-    ),
-    dict(
-        view=WorkshopView,
-        url="/api/v1/workshop",
-        endpoint="create-workshop",
-        methods=["POST"],
+        methods=["DELETE", "GET"],
     ),
 ]
