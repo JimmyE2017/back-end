@@ -1,10 +1,14 @@
 from flask_jwt_extended import get_jwt_identity
 
 from app.common.errors import EntityNotFoundError
-from app.models.workshop_model import WorkshopModel, WorkshopParticipants, ParticipantStatus
-from app.models.user_model import UserModel, Roles
-from app.schemas.workshop_schemas import WorkshopSchema, WorkshopDetailSchema
+from app.models.user_model import Roles, UserModel
+from app.models.workshop_model import (
+    ParticipantStatus,
+    WorkshopModel,
+    WorkshopParticipants,
+)
 from app.schemas.user_schemas import UserSchema
+from app.schemas.workshop_schemas import WorkshopDetailSchema, WorkshopSchema
 
 
 def get_workshop(workshop_id) -> (dict, int):
@@ -48,28 +52,40 @@ def delete_workshop(workshop_id: str) -> (dict, int):
 
     return {}, 204
 
+
 def add_participant(workshop_id, user_data) -> (dict, int):
     workshop = WorkshopModel.find_by_id(workshop_id=workshop_id)
     user_data = UserSchema().loads(user_data)
     # Check if given workshop_id exists in DB
-    if workshop is None or user_data.get('email') is None or user_data.get('firstName') is None or user_data.get('lastName') is None:
+    if (
+        workshop is None
+        or user_data.get("email") is None
+        or user_data.get("firstName") is None
+        or user_data.get("lastName") is None
+    ):
         raise EntityNotFoundError
-    user = UserModel.find_by_email(user_data.get('email'))
+    user = UserModel.find_by_email(user_data.get("email"))
     participant = None
     if user is None:
-        user = UserModel(email=user_data.get('email'), firstName=user_data.get('firstName'), lastName=user_data.get('lastName'), role=["participant"])
+        user = UserModel(
+            email=user_data.get("email"),
+            firstName=user_data.get("firstName"),
+            lastName=user_data.get("lastName"),
+            role=["participant"],
+        )
         user.save()
         status = "created"
     else:
         status = "existing"
-    user = UserModel.find_by_email(user_data.get('email'))
+    user = UserModel.find_by_email(user_data.get("email"))
     participant = WorkshopParticipants(user=user.userId, status=status)
     if workshop_id not in user.workshopParticipation:
         user.workshopParticipation.append(workshop_id)
         workshop.participants.append(participant)
     user.save()
     workshop.save()
-    return WorkshopDetailSchema().dump(workshop),200
+    return WorkshopDetailSchema().dump(workshop), 200
+
 
 def remove_participant(workshop_id, participant_id) -> (dict, int):
     workshop = WorkshopModel.find_by_id(workshop_id=workshop_id)
@@ -89,4 +105,4 @@ def remove_participant(workshop_id, participant_id) -> (dict, int):
     user.workshopParticipation = updated_workshop
     workshop.save()
     user.save()
-    return WorkshopDetailSchema().dump(workshop),200
+    return WorkshopDetailSchema().dump(workshop), 200

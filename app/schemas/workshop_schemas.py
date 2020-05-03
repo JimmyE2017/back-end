@@ -26,9 +26,11 @@ class WorkshopSchema(CustomSchema):
 
         return data
 
+
 class ParticipantSchema(CustomSchema):
     user = fields.Nested(UserSchema)
     status = fields.Str()
+
 
 class WorkshopDetailSchema(CustomSchema):
     workshopId = fields.Str(dump_only=True)

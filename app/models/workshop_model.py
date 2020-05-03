@@ -17,8 +17,10 @@ class ParticipantStatus(Enum):
 
 class WorkshopParticipants(db.EmbeddedDocument):
     from app.models.user_model import UserModel
+
     user = db.ReferenceField(UserModel)
     status = db.StringField(max_length=32)
+
 
 class WorkshopModel(db.Document):
     """
@@ -40,7 +42,9 @@ class WorkshopModel(db.Document):
     eventUrl = db.StringField(default="caplc.com")
     city = db.StringField(max_length=128, min_length=1)
     address = db.StringField(max_length=512)
-    participants = db.ListField(db.EmbeddedDocumentField(WorkshopParticipants), default=[])
+    participants = db.ListField(
+        db.EmbeddedDocumentField(WorkshopParticipants), default=[]
+    )
 
     def __repr__(self):
         return (
@@ -64,5 +68,3 @@ class WorkshopModel(db.Document):
         except db.DoesNotExist:
             workshops = []
         return workshops
-
-

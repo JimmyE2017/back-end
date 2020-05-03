@@ -8,7 +8,12 @@ from app.api.v1.user_views import (
     ResetPasswordView,
     UserMeView,
 )
-from app.api.v1.workshop_views import WorkshopListView, WorkshopView, WorkshopParticipantListView, WorkshopParticipantView
+from app.api.v1.workshop_views import (
+    WorkshopListView,
+    WorkshopParticipantListView,
+    WorkshopParticipantView,
+    WorkshopView,
+)
 
 urlpatterns = [
     dict(view=PingView, url="/api/ping", endpoint="ping", methods=["GET"]),
@@ -74,5 +79,5 @@ urlpatterns = [
         url="/api/v1/workshops/<string:workshop_id>/participants/<string:participant_id>",
         endpoint="workshop-participant",
         methods=["DELETE"],
-    )
+    ),
 ]
