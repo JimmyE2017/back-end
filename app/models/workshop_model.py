@@ -11,12 +11,13 @@ class ParticipantStatus(Enum):
     CREATED = "created"
     EXISTING = "existing"
     FORMSENT = "formsent"
+    TOCHECK = "tocheck"
     READY = "ready"
 
 
 class WorkshopParticipants(db.EmbeddedDocument):
     from app.models.user_model import UserModel
-    userid = db.ReferenceField(UserModel)
+    user = db.ReferenceField(UserModel)
     status = db.StringField(max_length=32)
 
 class WorkshopModel(db.Document):
