@@ -18,7 +18,7 @@ def get_workshop(workshop_id) -> (dict, int):
     if workshop is None:
         raise EntityNotFoundError
 
-    return WorkshopSchema().dump(workshop), 200
+    return WorkshopDetailSchema().dump(workshop), 200
 
 
 def get_workshops() -> (dict, int):
