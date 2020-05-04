@@ -26,6 +26,7 @@ class WorkshopModel(db.Document):
     eventUrl = db.StringField(default="caplc.com")
     city = db.StringField(max_length=128, min_length=1)
     address = db.StringField(max_length=512)
+    modelId = db.StringField(required=True)
 
     def __repr__(self):
         return (

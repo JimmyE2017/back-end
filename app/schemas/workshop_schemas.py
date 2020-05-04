@@ -2,6 +2,7 @@ from marshmallow import ValidationError, fields, post_load, validate
 
 from app.models.coach_model import CoachModel
 from app.schemas import CustomSchema
+from app.schemas.action_card_schemas import ActionCardBatchSchema, ActionCardSchema
 
 
 class WorkshopSchema(CustomSchema):
@@ -24,3 +25,17 @@ class WorkshopSchema(CustomSchema):
             )
 
         return data
+
+
+class WorkshopModelSchema(CustomSchema):
+    id = fields.Str()
+    footprintStructure = fields.Dict()
+    variableFormulas = fields.Dict()
+    globalCarbonVariables = fields.Dict()
+    actionCards = fields.List(fields.Nested(ActionCardSchema))
+    actionCardBatches = fields.List(fields.Nested(ActionCardBatchSchema))
+
+
+class WorkshopDetailSchema(WorkshopSchema):
+    model = fields.Nested(WorkshopModelSchema)
+    # participants = fields.List(fields.Nested(WorkshopParticipantSchema))

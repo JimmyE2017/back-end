@@ -1,8 +1,9 @@
 from flask_jwt_extended import get_jwt_identity
 
 from app.common.errors import EntityNotFoundError
+from app.models.model_model import Model
 from app.models.workshop_model import WorkshopModel
-from app.schemas.workshop_schemas import WorkshopSchema
+from app.schemas.workshop_schemas import WorkshopDetailSchema, WorkshopSchema
 
 
 def get_workshop(workshop_id) -> (dict, int):
@@ -12,7 +13,14 @@ def get_workshop(workshop_id) -> (dict, int):
     if workshop is None:
         raise EntityNotFoundError
 
-    return WorkshopSchema().dump(workshop), 200
+    # Append data from model
+    model = Model.find_by_id(model_id=workshop.modelId)
+    if model is None:
+        raise Exception(f"Model {workshop.modelId} does not exist")
+
+    workshop.model = model
+
+    return WorkshopDetailSchema().dump(workshop), 200
 
 
 def get_workshops() -> (dict, int):
@@ -28,7 +36,11 @@ def create_workshop(data: bytes) -> (dict, int):
         return err_msg, err_code
 
     workshop = WorkshopModel(**data)
+    # Append creator id
     workshop.creatorId = get_jwt_identity()
+    # Append last created model id
+    model = Model.find_last_created_model()
+    workshop.modelId = model.id
     workshop.save()
 
     workshop.reload()
