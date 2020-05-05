@@ -1,0 +1,35 @@
+version: '3.7'
+
+services:
+  api:
+    image: caplc_api:0.1.0
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - 5001:5000
+    environnements:
+      - FLASK_ENV=development
+      - FLASK_APP="app:create_app('local')"
+      - SECRET_KEY=my_precious_secret_key
+      - PREFERRED_URL_SCHEME=http://example.com
+      - FLASK_CONFIG=local
+      - MONGODB_USERNAME=mongocaplc
+      - MONGODB_PASSWORD=mongocaplc
+      - MONGODB_DB=caplcDB
+      - MONGODB_HOST=mongodb
+      - MONGODB_PORT=27017
+      - MAIL_SERVER=localhost
+      - MAIL_PORT=25
+      - MAIL_USE_TLS=0
+      - MAIL_USE_SSL=0
+      - MAIL_USERNAME=example@test.com
+      - MAIL_PASSWORD=mypassword
+      - MAIL_DEFAULT_SENDER=example@test.com
+    depends_on:
+      - mongodb
+  mongodb:
+    image: mongo:4.2.5
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongocaplc
+      MONGO_INITDB_ROOT_PASSWORD: mongocaplc
