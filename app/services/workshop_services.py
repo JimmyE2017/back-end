@@ -14,10 +14,6 @@ def get_workshop(workshop_id) -> (dict, int):
     if workshop is None:
         raise EntityNotFoundError
 
-    # Append data from model
-    model = Model.find_by_id(model_id=workshop.modelId)
-    workshop.model = model
-
     # Append action cards to field model
     action_cards = ActionCardModel.find_all()
     workshop.model.actionCards = action_cards
@@ -48,7 +44,7 @@ def create_workshop(data: bytes) -> (dict, int):
     workshop.creatorId = get_jwt_identity()
     # Append last created model id
     model = Model.find_last_created_model()
-    workshop.modelId = model.id
+    workshop.model = model
 
     workshop.save()
 

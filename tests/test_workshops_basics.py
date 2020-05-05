@@ -48,7 +48,7 @@ def create_some_workshops(db, request, init_coach):
         eventUrl="http://www.example1.com",
         coachId=init_coach.id,
         creatorId=init_coach.id,
-        modelId="model_id",
+        model=None,
     )
     workshop2 = WorkshopModel(
         title="workshop_title_2",
@@ -58,7 +58,7 @@ def create_some_workshops(db, request, init_coach):
         eventUrl="http://www.example2.com",
         coachId=init_coach.id,
         creatorId=init_coach.id,
-        modelId="model_id",
+        model=None,
     )
 
     workshop1.save()
@@ -115,7 +115,7 @@ def test_delete_workshop(client, auth, init_admin, request):
         eventUrl="http://www.example.com",
         coachId=init_admin.id,
         creatorId=init_admin.id,
-        modelId="an_id",
+        model=None,
     )
     workshop.save()
 
@@ -253,11 +253,8 @@ def test_last_created_model_at_workshop_creation(client, auth, init_admin, reque
     response = client.post("/api/v1/workshops", headers=headers, data=json.dumps(data))
 
     workshop = WorkshopModel.find_by_id(json.loads(response.data)["workshopId"])
-    print(model1.createdAt)
-    print(model2.createdAt)
-    print(workshop.modelId)
 
-    assert workshop.modelId == model2.id
+    assert workshop.model.id == model2.id
 
     def teardown():
         workshop.delete()

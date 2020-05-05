@@ -115,7 +115,7 @@ def setup_data(init_coach, request):
         eventUrl="http://www.example1.com",
         coachId=init_coach.id,
         creatorId=init_coach.id,
-        modelId=model.id,
+        model=model,
     )
 
     workshop.save()

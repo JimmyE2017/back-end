@@ -4,6 +4,7 @@ import datetime
 
 from app.common.uuid_generator import generate_id
 from app.models import db
+from app.models.model_model import Model
 
 
 class WorkshopModel(db.Document):
@@ -26,7 +27,7 @@ class WorkshopModel(db.Document):
     eventUrl = db.StringField(default="caplc.com")
     city = db.StringField(max_length=128, min_length=1)
     address = db.StringField(max_length=512)
-    modelId = db.StringField(required=True)
+    model = db.ReferenceField(Model)
 
     def __repr__(self):
         return (
