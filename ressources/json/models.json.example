@@ -1,0 +1,18 @@
+{
+  "footprintStructure": {
+    "footprint_category_1": "variable_1"
+  },
+  "variableFormulas": {
+    "variable_1": {
+      "+": [
+        {
+          "var": "global_variable_name"
+        },
+        1295
+      ]
+    }
+  },
+  "globalCarbonVariables": {
+    "global_variable_name": 42
+  }
+}
