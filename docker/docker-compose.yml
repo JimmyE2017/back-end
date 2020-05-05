@@ -4,11 +4,11 @@ services:
   api:
     image: caplc_api:0.1.0
     build:
-      context: .
+      context: ../.
       dockerfile: docker/Dockerfile
     ports:
       - 5001:5000
-    environnements:
+    environment:
       - FLASK_ENV=development
       - FLASK_APP="app:create_app('local')"
       - SECRET_KEY=my_precious_secret_key
