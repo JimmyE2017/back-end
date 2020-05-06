@@ -13,8 +13,8 @@ services:
       - SECRET_KEY=my_precious_secret_key
       - PREFERRED_URL_SCHEME=http://example.com
       - FLASK_CONFIG=local
-      - MONGODB_USERNAME=mongocaplc
-      - MONGODB_PASSWORD=mongocaplc
+      - MONGODB_USERNAME=caplc_user
+      - MONGODB_PASSWORD=password123
       - MONGODB_DB=caplcDB
       - MONGODB_HOST=mongodb
       - MONGODB_PORT=27017
@@ -30,5 +30,9 @@ services:
   mongodb:
     image: mongo:4.2.5
     environment:
-      MONGO_INITDB_ROOT_USERNAME: mongocaplc
-      MONGO_INITDB_ROOT_PASSWORD: mongocaplc
+      - MONGO_INITDB_ROOT_USERNAME=mongocaplc
+      - MONGO_INITDB_ROOT_PASSWORD=mongocaplc
+      - MONGO_INITDB_DATABASE=caplcDB
+    volumes:
+      - $PWD/docker/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
+    command: mongod --auth
