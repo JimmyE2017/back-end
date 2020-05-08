@@ -10,8 +10,8 @@ from app.models.action_card_model import (
     ActionCardType,
 )
 from app.models.model_model import Model
-from app.models.workshop_model import WorkshopModel, WorkshopParticipants
 from app.models.user_model import UserModel
+from app.models.workshop_model import WorkshopModel, WorkshopParticipants
 
 
 @pytest.fixture(scope="function")
@@ -117,9 +117,9 @@ def setup_data(init_coach, request):
     user.save()
     user.reload()
     user_to_add = {
-        'email':"trumpy@gmail.com",
-        'firstName':"Donald",
-        'lastName':"Trump"
+        "email": "trumpy@gmail.com",
+        "firstName": "Donald",
+        "lastName": "Trump",
     }
     participant = WorkshopParticipants(user=user.userId, status="created")
 
@@ -132,7 +132,7 @@ def setup_data(init_coach, request):
         coachId=init_coach.id,
         creatorId=init_coach.id,
         model=model,
-        participants=[participant]
+        participants=[participant],
     )
 
     workshop.save()
@@ -168,15 +168,17 @@ def test_get_workshop(client, auth, init_coach, setup_data):
         "coachId": workshop.coachId,
         "creatorId": workshop.creatorId,
         "workshopId": workshop.id,
-        "participants": [{
-            'status': 'created',
-            'user': {
-                'email':user.email,
-                'firstName': user.firstName,
-                'lastName': user.lastName,
-                'userId': user.userId
+        "participants": [
+            {
+                "status": "created",
+                "user": {
+                    "email": user.email,
+                    "firstName": user.firstName,
+                    "lastName": user.lastName,
+                    "userId": user.userId,
+                },
             }
-        }],
+        ],
         "model": {
             "id": model.id,
             "globalCarbonVariables": model.globalCarbonVariables,
@@ -211,30 +213,37 @@ def test_get_workshop(client, auth, init_coach, setup_data):
     assert response_data == expected_output
 
 
-
 def test_add_participant_workshop(client, auth, init_coach, setup_data, request):
     workshop, model, action_cards, action_card_batches, user, user_to_add = setup_data
     headers = auth.login(email="coach@test.com")
 
-    response = client.post("/api/v1/workshops/{}/participants".format(workshop.workshopId), headers=headers, data=json.dumps(user_to_add))
+    response = client.post(
+        "/api/v1/workshops/{}/participants".format(workshop.workshopId),
+        headers=headers,
+        data=json.dumps(user_to_add),
+    )
     response_data, status_code = json.loads(response.data), response.status_code
 
     workshop.reload()
-    new_user = UserModel.find_by_email(user_to_add.get('email'))
+    new_user = UserModel.find_by_email(user_to_add.get("email"))
     assert status_code == 200
     assert len(workshop.participants) == 2
     assert new_user != None
-    
+
     def teardown():
         new_user.delete()
 
     request.addfinalizer(teardown)
 
+
 def test_delete_participant_workshop(client, auth, init_coach, setup_data, request):
     workshop, model, action_cards, action_card_batches, user, user_to_add = setup_data
     headers = auth.login(email="coach@test.com")
 
-    response = client.delete("/api/v1/workshops/{}/participants/{}".format(workshop.workshopId, user.userId), headers=headers)
+    response = client.delete(
+        "/api/v1/workshops/{}/participants/{}".format(workshop.workshopId, user.userId),
+        headers=headers,
+    )
     response_data, status_code = json.loads(response.data), response.status_code
 
     workshop.reload()
