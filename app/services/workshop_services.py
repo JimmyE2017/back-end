@@ -1,12 +1,10 @@
 from flask_jwt_extended import get_jwt_identity
 
 from app.common.errors import EntityNotFoundError
-from app.models.user_model import Roles, UserModel
-from app.models.workshop_model import (
-    ParticipantStatus,
-    WorkshopModel,
-    WorkshopParticipants,
-)
+from app.models.action_card_model import ActionCardBatchModel, ActionCardModel
+from app.models.model_model import Model
+from app.models.user_model import UserModel
+from app.models.workshop_model import WorkshopModel, WorkshopParticipants
 from app.schemas.user_schemas import UserSchema
 from app.schemas.workshop_schemas import WorkshopDetailSchema, WorkshopSchema
 
@@ -17,6 +15,16 @@ def get_workshop(workshop_id) -> (dict, int):
     # Check if given workshop_id exists in DB
     if workshop is None:
         raise EntityNotFoundError
+
+    # Append action cards to field model
+    action_cards = ActionCardModel.find_all()
+    workshop.model.actionCards = action_cards
+
+    # Append action card batches from creator to field model
+    action_cards_batches = ActionCardBatchModel.find_action_card_batches_by_coach(
+        coach_id=workshop.coachId
+    )
+    workshop.model.actionCardBatches = action_cards_batches
 
     return WorkshopDetailSchema().dump(workshop), 200
 
@@ -34,7 +42,12 @@ def create_workshop(data: bytes) -> (dict, int):
         return err_msg, err_code
 
     workshop = WorkshopModel(**data)
+    # Append creator id
     workshop.creatorId = get_jwt_identity()
+    # Append last created model id
+    model = Model.find_last_created_model()
+    workshop.model = model
+
     workshop.save()
 
     workshop.reload()

@@ -5,6 +5,7 @@ from enum import Enum
 
 from app.common.uuid_generator import generate_id
 from app.models import db
+from app.models.model_model import Model
 
 
 class ParticipantStatus(Enum):
@@ -45,6 +46,7 @@ class WorkshopModel(db.Document):
     participants = db.ListField(
         db.EmbeddedDocumentField(WorkshopParticipants), default=[]
     )
+    model = db.ReferenceField(Model)
 
     def __repr__(self):
         return (
