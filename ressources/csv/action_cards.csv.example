@@ -1,4 +1,4 @@
-actionCardId,number,title,category,type,key,sector,cost
-1,1,action_card_title_1,eco-friendly action,individual,action_card_key_1,action_card_sector_1,1
-2,2,action_card_title_2,awareness,individual,action_card_key_2,action_card_sector_2,2
-3,3,action_card_title_3,system,collective,action_card_key_3,action_card_sector_3,3
+actionCardId,cardNumber,name,category,type,key,sector,cost
+1,1,action_card_name_1,eco-friendly action,individual,action_card_key_1,action_card_sector_1,1
+2,2,action_card_name_2,awareness,individual,action_card_key_2,action_card_sector_2,2
+3,3,action_card_name_3,system,collective,action_card_key_3,action_card_sector_3,3

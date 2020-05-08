@@ -16,7 +16,7 @@ class WorkshopModel(db.Document):
     meta = {"collection": "workshops"}
 
     workshopId = db.StringField(primary_key=True, default=generate_id)
-    title = db.StringField(
+    name = db.StringField(
         required=True, max_length=128, min_length=1, default="Atelier CAPLC"
     )
     createdAt = db.DateTimeField(default=datetime.datetime.utcnow)
@@ -31,7 +31,7 @@ class WorkshopModel(db.Document):
 
     def __repr__(self):
         return (
-            f"<Workshop {self.workshopId} | {self.title} "
+            f"<Workshop {self.workshopId} | {self.name} "
             f"- animated by {self.coachId} at {self.city} on {self.startAt}>"
         )
 

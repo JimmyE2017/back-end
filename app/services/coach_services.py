@@ -61,8 +61,7 @@ def create_coach(data: bytes) -> (dict, int):
     for default_action_card_batch in default_action_card_batches:
         ActionCardBatchModel(
             coachId=user.id,
-            number=default_action_card_batch.number,
-            title=default_action_card_batch.title,
+            name=default_action_card_batch.name,
             actionCardIds=default_action_card_batch.actionCardIds,
             type=default_action_card_batch.type,
         ).save()

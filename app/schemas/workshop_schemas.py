@@ -6,8 +6,8 @@ from app.schemas.action_card_schemas import ActionCardBatchSchema, ActionCardSch
 
 
 class WorkshopSchema(CustomSchema):
-    workshopId = fields.Str(dump_only=True)
-    title = fields.Str(required=True, validate=validate.Length(min=1, max=128))
+    id = fields.Str(dump_only=True)
+    name = fields.Str(required=True, validate=validate.Length(min=1, max=128))
     startAt = fields.AwareDateTime(required=True)
     creatorId = fields.Str(dump_only=True)
     coachId = fields.Str(required=True, validate=validate.Length(min=1))
@@ -43,7 +43,7 @@ class WorkshopDetailSchema(WorkshopSchema):
     @post_dump
     def sort_model_action_cards(self, data, **kwargs):
         action_cards = data["model"]["actionCards"]
-        action_cards = sorted(action_cards, key=lambda x: x["number"])
+        action_cards = sorted(action_cards, key=lambda x: x["cardNumber"])
 
         data["model"]["actionCards"] = action_cards
         return data
@@ -51,7 +51,7 @@ class WorkshopDetailSchema(WorkshopSchema):
     @post_dump
     def sort_model_action_card_batches(self, data, **kwargs):
         action_card_batches = data["model"]["actionCardBatches"]
-        action_card_batches = sorted(action_card_batches, key=lambda x: x["title"])
+        action_card_batches = sorted(action_card_batches, key=lambda x: x["name"])
 
         data["model"]["actionCardBatches"] = action_card_batches
         return data

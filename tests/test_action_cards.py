@@ -16,8 +16,8 @@ from app.models.user_model import Roles
 @pytest.fixture(scope="class")
 def create_some_action_cards(db, request):
     action_card1 = ActionCardModel(
-        number=1,
-        title="action_card_title_1",
+        cardNumber=1,
+        name="action_card_name_1",
         category=ActionCardCategory.AWARENESS.value,
         type=ActionCardType.INDIVIDUAL.value,
         key="action_card_key_1",
@@ -26,8 +26,8 @@ def create_some_action_cards(db, request):
     )
 
     action_card2 = ActionCardModel(
-        number=2,
-        title="action_card_title_2",
+        cardNumber=2,
+        name="action_card_name_2",
         category=ActionCardCategory.ECOFRIENDLY_ACTION.value,
         type=ActionCardType.INDIVIDUAL.value,
         key="action_card_key_2",
@@ -35,8 +35,8 @@ def create_some_action_cards(db, request):
         cost=2,
     )
     action_card3 = ActionCardModel(
-        number=3,
-        title="action_card_title_3",
+        cardNumber=3,
+        name="action_card_name_3",
         category=ActionCardCategory.SYSTEM.value,
         type=ActionCardType.COLLECTIVE.value,
         key="action_card_key_3",
@@ -64,32 +64,28 @@ def create_some_action_card_batches(init_coach, request):
     # Coach's batch
     action_card_batch1 = ActionCardBatchModel(
         coachId=init_coach.id,
-        number=1,
-        title="action_card_batch_title_1",
+        name="action_card_batch_name_1",
         type=ActionCardType.INDIVIDUAL.value,
         actionCardIds=["1", "2"],
     )
 
     action_card_batch2 = ActionCardBatchModel(
         coachId=init_coach.id,
-        number=2,
-        title="action_card_batch_title_2",
+        name="action_card_batch_name_2",
         type=ActionCardType.COLLECTIVE.value,
         actionCardIds=["1", "3"],
     )
     # Default batches
     action_card_batch3 = ActionCardBatchModel(
         default=True,
-        number=3,
-        title="action_card_batch_title_3",
+        name="action_card_batch_name_3",
         type=ActionCardType.INDIVIDUAL.value,
         actionCardIds=["1", "2"],
     )
 
     action_card_batch4 = ActionCardBatchModel(
         default=True,
-        number=4,
-        title="action_card_batch_title_4",
+        name="action_card_batch_name_4",
         type=ActionCardType.COLLECTIVE.value,
         actionCardIds=["1", "3"],
     )
@@ -124,9 +120,9 @@ class TestActionCardsRessourcesWithExistingData:
         response_data, status_code = json.loads(response.data), response.status_code
 
         expected_first_result = {
-            "actionCardId": self.action_cards[0].actionCardId,
-            "number": self.action_cards[0].number,
-            "title": self.action_cards[0].title,
+            "id": self.action_cards[0].actionCardId,
+            "cardNumber": self.action_cards[0].cardNumber,
+            "name": self.action_cards[0].name,
             "category": self.action_cards[0].category,
             "type": self.action_cards[0].type,
             "key": self.action_cards[0].key,
@@ -150,9 +146,8 @@ class TestActionCardsRessourcesWithExistingData:
         response_data, status_code = json.loads(response.data), response.status_code
         action_card_batches = create_some_action_card_batches
         expected_first_result = {
-            "actionCardBatchId": action_card_batches[0].actionCardBatchId,
-            "number": action_card_batches[0].number,
-            "title": action_card_batches[0].title,
+            "id": action_card_batches[0].actionCardBatchId,
+            "name": action_card_batches[0].name,
             "type": action_card_batches[0].type,
             "actionCardIds": action_card_batches[0].actionCardIds,
         }
@@ -173,17 +168,13 @@ class TestActionCardsRessourcesWithExistingData:
 
         data = [
             {
-                "number": 1,
-                "title": "action_card_batch_title_1",
+                "name": "action_card_batch_name_1",
                 "type": ActionCardType.INDIVIDUAL.value,
                 "actionCardIds": [action_card1.id, action_card2.id],
             },
             {
-                "actionCardBatchId": create_some_action_card_batches[
-                    0
-                ].actionCardBatchId,
-                "number": 2,
-                "title": "action_card_batch_title_2_bis",
+                "id": create_some_action_card_batches[0].actionCardBatchId,
+                "name": "action_card_batch_name_2_bis",
                 "type": ActionCardType.COLLECTIVE.value,
                 "actionCardIds": [action_card3.id],
             },
@@ -197,7 +188,7 @@ class TestActionCardsRessourcesWithExistingData:
         response_data, status_code = json.loads(response.data), response.status_code
 
         assert status_code == 200
-        assert "actionCardBatchId" in response_data[0]
+        assert "id" in response_data[0]
         assert (
             len(
                 ActionCardBatchModel.find_action_card_batches_by_coach(
@@ -215,14 +206,12 @@ class TestActionCardsRessourcesWithExistingData:
         incorrect_id = "incorrect_id"
         data = [
             {
-                "number": 1,
-                "title": "action_card_batch_title_1",
+                "name": "action_card_batch_name_1",
                 "type": ActionCardType.INDIVIDUAL.value,
                 "actionCardIds": [incorrect_id, action_card2.id],
             },
             {
-                "number": 2,
-                "title": "action_card_batch_title_2",
+                "name": "action_card_batch_name_2",
                 "type": ActionCardType.COLLECTIVE.value,
                 "actionCardIds": [action_card3.id],
             },
@@ -257,14 +246,12 @@ class TestActionCardsRessourcesWithExistingData:
         )
         data = [
             {
-                "number": 1,
-                "title": "action_card_batch_title_1",
+                "name": "action_card_batch_name_1",
                 "type": ActionCardType.INDIVIDUAL.value,
                 "actionCardIds": [action_card2.id],
             },
             {
-                "number": 2,
-                "title": "action_card_batch_title_2",
+                "name": "action_card_batch_name_2",
                 "type": ActionCardType.COLLECTIVE.value,
                 "actionCardIds": [action_card3.id],
             },
@@ -302,14 +289,12 @@ class TestActionCardsRessourcesWithExistingData:
         )
         data = [
             {
-                "number": 1,
-                "title": "action_card_batch_title_1",
+                "name": "action_card_batch_name_1",
                 "type": ActionCardType.INDIVIDUAL.value,
                 "actionCardIds": [action_card3.id, action_card2.id],
             },
             {
-                "number": 2,
-                "title": "action_card_batch_title_2",
+                "name": "action_card_batch_name_2",
                 "type": ActionCardType.COLLECTIVE.value,
                 "actionCardIds": [action_card1.id],
             },
@@ -352,13 +337,13 @@ class TestActionCardsRessourcesWithExistingData:
         response = client.post(
             "/api/v1/coaches", headers=headers, data=json.dumps(data)
         )
-        coach_id = json.loads(response.data)["userId"]
+        coach_id = json.loads(response.data)["id"]
 
         action_card_batches = ActionCardBatchModel.find_action_card_batches_by_coach(
             coach_id
         )
         assert len(action_card_batches) == 2
-        assert create_some_action_card_batches[2].title == action_card_batches[0].title
+        assert create_some_action_card_batches[2].name == action_card_batches[0].name
 
         def teardown():
             CoachModel.find_by_id(coach_id).delete()
