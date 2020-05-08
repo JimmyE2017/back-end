@@ -90,14 +90,14 @@ def add_participant(workshop_id, user_data) -> (dict, int):
         status = "created"
     else:
         status = "existing"
-    user = UserModel.find_by_email(user_data.get("email"))
+    user.reload()
     participant = WorkshopParticipants(user=user.userId, status=status)
     if workshop_id not in user.workshopParticipation:
         user.workshopParticipation.append(workshop_id)
         workshop.participants.append(participant)
     user.save()
     workshop.save()
-    return WorkshopDetailSchema().dump(workshop), 200
+    return get_workshop(workshop_id)
 
 
 def remove_participant(workshop_id, participant_id) -> (dict, int):
@@ -108,7 +108,7 @@ def remove_participant(workshop_id, participant_id) -> (dict, int):
         raise EntityNotFoundError
     updated_participants = []
     for participant in workshop.participants:
-        if participant.user != participant_id:
+        if participant.user.userId != participant_id:
             updated_participants.append(participant)
     workshop.participants = updated_participants
     updated_workshop = []
@@ -118,4 +118,4 @@ def remove_participant(workshop_id, participant_id) -> (dict, int):
     user.workshopParticipation = updated_workshop
     workshop.save()
     user.save()
-    return WorkshopDetailSchema().dump(workshop), 200
+    return get_workshop(workshop_id)
