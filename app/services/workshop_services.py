@@ -70,12 +70,7 @@ def add_participant(workshop_id, user_data) -> (dict, int):
     workshop = WorkshopModel.find_by_id(workshop_id=workshop_id)
     user_data = UserSchema().loads(user_data)
     # Check if given workshop_id exists in DB
-    if (
-        workshop is None
-        or user_data.get("email") is None
-        or user_data.get("firstName") is None
-        or user_data.get("lastName") is None
-    ):
+    if workshop is None:
         raise EntityNotFoundError
     user = UserModel.find_by_email(user_data.get("email"))
     participant = None
