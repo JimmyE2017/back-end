@@ -29,7 +29,7 @@ class WorkshopModel(db.Document):
     Please inherit from it if you want to create a new type of workshop
     """
 
-    meta = {"collection": "workshops", "allow_inheritance": True}
+    meta = {"collection": "workshops"}
 
     workshopId = db.StringField(primary_key=True, default=generate_id)
     title = db.StringField(
