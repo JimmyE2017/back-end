@@ -10,8 +10,9 @@ from app.models.action_card_model import (
     ActionCardType,
 )
 from app.models.model_model import Model
+from app.models.participant_model import ParticipantModel
 from app.models.user_model import UserModel
-from app.models.workshop_model import WorkshopModel, WorkshopParticipants
+from app.models.workshop_model import WorkshopModel
 
 
 @pytest.fixture(scope="function")
@@ -121,7 +122,7 @@ def setup_data(init_coach, request):
         "firstName": "Donald",
         "lastName": "Trump",
     }
-    participant = WorkshopParticipants(user=user.userId, status="created")
+    participant = ParticipantModel(user=user.userId, status="created")
 
     workshop = WorkshopModel(
         title="workshop_title_1",
@@ -222,13 +223,13 @@ def test_add_participant_workshop(client, auth, init_coach, setup_data, request)
         headers=headers,
         data=json.dumps(user_to_add),
     )
-    response_data, status_code = json.loads(response.data), response.status_code
+    status_code = response.status_code
 
     workshop.reload()
     new_user = UserModel.find_by_email(user_to_add.get("email"))
     assert status_code == 200
     assert len(workshop.participants) == 2
-    assert new_user != None
+    assert new_user is not None
 
     def teardown():
         new_user.delete()
@@ -244,7 +245,7 @@ def test_delete_participant_workshop(client, auth, init_coach, setup_data, reque
         "/api/v1/workshops/{}/participants/{}".format(workshop.workshopId, user.userId),
         headers=headers,
     )
-    response_data, status_code = json.loads(response.data), response.status_code
+    status_code = response.status_code
 
     workshop.reload()
     assert status_code == 200
