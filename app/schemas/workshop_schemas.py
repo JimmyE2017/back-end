@@ -1,7 +1,8 @@
-from marshmallow import ValidationError, fields, post_load, validate
+from marshmallow import ValidationError, fields, post_dump, post_load, validate
 
 from app.models.coach_model import CoachModel
 from app.schemas import CustomSchema
+from app.schemas.action_card_schemas import ActionCardBatchSchema, ActionCardSchema
 
 
 class WorkshopSchema(CustomSchema):
@@ -23,4 +24,34 @@ class WorkshopSchema(CustomSchema):
                 "Coach does not exist : {}".format(coach_id), "coachId"
             )
 
+        return data
+
+
+class WorkshopModelSchema(CustomSchema):
+    id = fields.Str()
+    footprintStructure = fields.Dict()
+    variableFormulas = fields.Dict()
+    globalCarbonVariables = fields.Dict()
+    actionCards = fields.List(fields.Nested(ActionCardSchema))
+    actionCardBatches = fields.List(fields.Nested(ActionCardBatchSchema))
+
+
+class WorkshopDetailSchema(WorkshopSchema):
+    model = fields.Nested(WorkshopModelSchema)
+    # participants = fields.List(fields.Nested(WorkshopParticipantSchema))
+
+    @post_dump
+    def sort_model_action_cards(self, data, **kwargs):
+        action_cards = data["model"]["actionCards"]
+        action_cards = sorted(action_cards, key=lambda x: x["number"])
+
+        data["model"]["actionCards"] = action_cards
+        return data
+
+    @post_dump
+    def sort_model_action_card_batches(self, data, **kwargs):
+        action_card_batches = data["model"]["actionCardBatches"]
+        action_card_batches = sorted(action_card_batches, key=lambda x: x["title"])
+
+        data["model"]["actionCardBatches"] = action_card_batches
         return data
