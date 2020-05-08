@@ -35,6 +35,8 @@ coverage.xml
 
 # Environments
 venv/*.env
+venv/bin/*
+venv/include/*
 
 # Pycharm stuff
 .idea/
