@@ -68,7 +68,9 @@ def delete_workshop(workshop_id: str) -> (dict, int):
 
 def add_participant(workshop_id, user_data) -> (dict, int):
     workshop = WorkshopModel.find_by_id(workshop_id=workshop_id)
-    user_data = UserSchema().loads(user_data)
+    user_data, err_msg, err_code = UserSchema().loads_or_400(user_data)
+    if err_msg:
+        return err_msg, err_code
     # Check if given workshop_id exists in DB
     if workshop is None:
         raise EntityNotFoundError
