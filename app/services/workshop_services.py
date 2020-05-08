@@ -3,8 +3,9 @@ from flask_jwt_extended import get_jwt_identity
 from app.common.errors import EntityNotFoundError
 from app.models.action_card_model import ActionCardBatchModel, ActionCardModel
 from app.models.model_model import Model
+from app.models.participant_model import ParticipantModel
 from app.models.user_model import UserModel
-from app.models.workshop_model import WorkshopModel, WorkshopParticipants
+from app.models.workshop_model import WorkshopModel
 from app.schemas.user_schemas import UserSchema
 from app.schemas.workshop_schemas import WorkshopDetailSchema, WorkshopSchema
 
@@ -88,9 +89,9 @@ def add_participant(workshop_id, user_data) -> (dict, int):
     else:
         status = "existing"
     user.reload()
-    participant = WorkshopParticipants(user=user.userId, status=status)
-    if workshop_id not in user.workshopParticipation:
-        user.workshopParticipation.append(workshop_id)
+    participant = ParticipantModel(user=user.userId, status=status)
+    if workshop_id not in user.workshopParticipations:
+        user.workshopParticipations.append(workshop_id)
         workshop.participants.append(participant)
     user.save()
     workshop.save()
@@ -109,10 +110,10 @@ def remove_participant(workshop_id, participant_id) -> (dict, int):
             updated_participants.append(participant)
     workshop.participants = updated_participants
     updated_workshop = []
-    for registered in user.workshopParticipation:
+    for registered in user.workshopParticipations:
         if registered != workshop_id:
             updated_workshop.append(registered)
-    user.workshopParticipation = updated_workshop
+    user.workshopParticipations = updated_workshop
     workshop.save()
     user.save()
     return get_workshop(workshop_id)

@@ -10,6 +10,7 @@ from app.common.mail.mail_services import send_reset_password_mail
 from app.common.uuid_generator import generate_id
 from app.models import db
 
+
 class Roles(Enum):
     GUEST = "guest"
     PARTICIPANT = "participant"
@@ -44,7 +45,6 @@ class UserModel(db.Document):
     This is an abstract class.
     Please inherit from it if you want to create a new type of user
     """
-    
 
     meta = {"collection": "users", "allow_inheritance": True}
 
@@ -56,7 +56,7 @@ class UserModel(db.Document):
     role = db.ListField(db.StringField(max_length=32), required=True)
     createdAt = db.DateTimeField(default=datetime.datetime.utcnow)
     updatedAt = db.DateTimeField(default=datetime.datetime.utcnow)
-    workshopParticipation = db.ListField(db.StringField())
+    workshopParticipations = db.ListField(db.StringField())
 
     def __str__(self):
         return f"User {self.userId} - {self.firstName} {self.lastName}"

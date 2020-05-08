@@ -28,7 +28,7 @@ class WorkshopSchema(CustomSchema):
         return data
 
 
-class ParticipantSchema(CustomSchema):
+class WorkshopParticipantSchema(CustomSchema):
     user = fields.Nested(UserSchema)
     status = fields.Str()
 
@@ -43,9 +43,8 @@ class WorkshopModelSchema(CustomSchema):
 
 
 class WorkshopDetailSchema(WorkshopSchema):
-    participants = fields.List(fields.Nested(ParticipantSchema))
+    participants = fields.List(fields.Nested(WorkshopParticipantSchema))
     model = fields.Nested(WorkshopModelSchema)
-    # participants = fields.List(fields.Nested(WorkshopParticipantSchema))
 
     @post_dump
     def sort_model_action_cards(self, data, **kwargs):
