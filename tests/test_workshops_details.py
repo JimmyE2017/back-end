@@ -159,7 +159,7 @@ def test_get_workshop(client, auth, init_coach, setup_data):
 
     response = client.get("/api/v1/workshops/{}".format(workshop.id), headers=headers)
     response_data, status_code = json.loads(response.data), response.status_code
-
+    print(response_data)
     expected_output = {
         "title": workshop.title,
         "startAt": workshop.startAt.isoformat(),
@@ -172,12 +172,10 @@ def test_get_workshop(client, auth, init_coach, setup_data):
         "participants": [
             {
                 "status": "created",
-                "user": {
-                    "email": user.email,
-                    "firstName": user.firstName,
-                    "lastName": user.lastName,
-                    "userId": user.userId,
-                },
+                "email": user.email,
+                "firstName": user.firstName,
+                "lastName": user.lastName,
+                "userId": user.userId,
             }
         ],
         "model": {

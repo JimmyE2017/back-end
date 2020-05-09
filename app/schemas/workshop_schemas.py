@@ -1,4 +1,11 @@
-from marshmallow import ValidationError, fields, post_dump, post_load, validate
+from marshmallow import (
+    ValidationError,
+    fields,
+    post_dump,
+    post_load,
+    pre_dump,
+    validate,
+)
 
 from app.models.coach_model import CoachModel
 from app.schemas import CustomSchema
@@ -29,8 +36,14 @@ class WorkshopSchema(CustomSchema):
 
 
 class WorkshopParticipantSchema(CustomSchema):
-    user = fields.Nested(UserSchema)
     status = fields.Str()
+    user = fields.Nested(UserSchema)
+
+    @post_dump
+    def flatten_participant(self, data, **kwargs):
+        data = {**data, **data["user"]}
+        del data["user"]
+        return data
 
 
 class WorkshopModelSchema(CustomSchema):
