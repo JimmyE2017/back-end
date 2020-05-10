@@ -29,7 +29,7 @@ class WorkshopModel(db.Document):
     city = db.StringField(max_length=128, min_length=1)
     address = db.StringField(max_length=512)
     participants = db.ListField(db.EmbeddedDocumentField(ParticipantModel), default=[])
-    model = db.ReferenceField(Model)
+    model = db.ReferenceField(Model, db_field="modelId")
 
     def __repr__(self):
         return (

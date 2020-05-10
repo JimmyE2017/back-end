@@ -8,8 +8,7 @@ class Config:
     JWT_SECRET_KEY = SECRET_KEY
     DEBUG = False
     PREFERRED_URL_SCHEME = os.getenv("PREFERRED_URL_SCHEME", "")
-    # Flask-resful
-    JSONIFY_PRETTYPRINT_REGULAR = True
+    JSON_SORT_KEYS = False
 
     # Flask-JWT-Extended
     JWT_BLACKLIST_ENABLED = True

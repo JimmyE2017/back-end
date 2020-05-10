@@ -173,7 +173,7 @@ def test_get_workshop(client, auth, init_coach, setup_data):
                 "email": user.email,
                 "firstName": user.firstName,
                 "lastName": user.lastName,
-                "userId": user.userId,
+                "id": user.userId,
             }
         ],
         "model": {
@@ -243,5 +243,5 @@ def test_delete_participant_workshop(client, auth, init_coach, setup_data, reque
     status_code = response.status_code
 
     workshop.reload()
-    assert status_code == 200
+    assert status_code == 204
     assert len(workshop.participants) == 0

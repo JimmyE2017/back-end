@@ -95,7 +95,7 @@ def add_participant(workshop_id, user_data) -> (dict, int):
         workshop.participants.append(participant)
     user.save()
     workshop.save()
-    return get_workshop(workshop_id)
+    return UserSchema().dump(user), 200
 
 
 def remove_participant(workshop_id, participant_id) -> (dict, int):
@@ -116,4 +116,4 @@ def remove_participant(workshop_id, participant_id) -> (dict, int):
     user.workshopParticipations = updated_workshop
     workshop.save()
     user.save()
-    return get_workshop(workshop_id)
+    return None, 204
