@@ -76,7 +76,8 @@ urlpatterns = [
     ),
     dict(
         view=WorkshopParticipantView,
-        url="/api/v1/workshops/<string:workshop_id>/participants/<string:participant_id>",
+        url="/api/v1/workshops/<string:workshop_id>/"
+        "participants/<string:participant_id>",
         endpoint="workshop-participant",
         methods=["DELETE"],
     ),

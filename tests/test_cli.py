@@ -73,8 +73,8 @@ def test_importcsv_no_drop(cli_runner, db, request):
 
     # Inserting an action card beforehand
     action_card4 = ActionCardModel(
-        number=4,
-        title="action_card_title_4",
+        cardNumber=4,
+        name="action_card_name_4",
         category="action_card_category_4",
         type="action_card_type_4",
         key="action_card_key_4",
@@ -108,8 +108,8 @@ def test_importcsv_with_drop(cli_runner, db, request):
 
     # Inserting an action card beforehand
     action_card4 = ActionCardModel(
-        number=4,
-        title="action_card_title_4",
+        cardNumber=4,
+        name="action_card_name_4",
         category="action_card_category_4",
         type="action_card_type_4",
         key="action_card_key_4",

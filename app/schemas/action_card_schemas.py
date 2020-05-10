@@ -5,9 +5,9 @@ from app.schemas import CustomSchema
 
 
 class ActionCardSchema(CustomSchema):
-    actionCardId = fields.Str(dump_only=True)
-    number = fields.Integer(strict=True, validate=validate.Range(min=1))
-    title = fields.Str(validate=validate.Length(min=1, max=256))
+    id = fields.Str(dump_only=True)
+    cardNumber = fields.Integer(strict=True, validate=validate.Range(min=1))
+    name = fields.Str(validate=validate.Length(min=1, max=256))
     category = fields.Str(validate=validate.Length(min=1, max=64))
     type = fields.Str(validate=validate.Length(min=1, max=64))
     key = fields.Str(validate=validate.Length(min=1, max=128))
@@ -16,9 +16,8 @@ class ActionCardSchema(CustomSchema):
 
 
 class ActionCardBatchSchema(CustomSchema):
-    actionCardBatchId = fields.Str()
-    number = fields.Integer(strict=True, validate=validate.Range(min=1))
-    title = fields.Str()
+    id = fields.Str()
+    name = fields.Str()
     actionCardIds = fields.List(fields.Str(), validate=validate.Length(min=1))
     type = fields.Str(
         validate=validate.OneOf(
@@ -38,7 +37,7 @@ class ActionCardBatchSchema(CustomSchema):
                 if action_card_id not in existing_action_cards:
                     raise ValidationError(
                         "actionCardId {} does not exist. (Batch {})".format(
-                            action_card_id, d["title"]
+                            action_card_id, d["name"]
                         ),
                         "actionCardIds",
                     )
@@ -56,7 +55,7 @@ class ActionCardBatchSchema(CustomSchema):
             ):
                 raise ValidationError(
                     "Action cards within the same batch must be of the same type. "
-                    "(Batch {})".format(d["title"]),
+                    "(Batch {})".format(d["name"]),
                     "actionCardIds",
                 )
 

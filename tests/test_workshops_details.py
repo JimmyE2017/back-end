@@ -56,8 +56,8 @@ def setup_data(init_coach, request):
     model.save()
 
     action_card1 = ActionCardModel(
-        number=1,
-        title="action_card_title_1",
+        cardNumber=1,
+        name="action_card_name_1",
         category=ActionCardCategory.AWARENESS.value,
         type=ActionCardType.INDIVIDUAL.value,
         key="action_card_key_1",
@@ -66,8 +66,8 @@ def setup_data(init_coach, request):
     )
 
     action_card2 = ActionCardModel(
-        number=2,
-        title="action_card_title_2",
+        cardNumber=2,
+        name="action_card_name_2",
         category=ActionCardCategory.ECOFRIENDLY_ACTION.value,
         type=ActionCardType.INDIVIDUAL.value,
         key="action_card_key_2",
@@ -75,8 +75,8 @@ def setup_data(init_coach, request):
         cost=2,
     )
     action_card3 = ActionCardModel(
-        number=3,
-        title="action_card_title_3",
+        cardNumber=3,
+        name="action_card_name_3",
         category=ActionCardCategory.SYSTEM.value,
         type=ActionCardType.COLLECTIVE.value,
         key="action_card_key_3",
@@ -91,16 +91,14 @@ def setup_data(init_coach, request):
 
     action_card_batch1 = ActionCardBatchModel(
         coachId=init_coach.id,
-        number=1,
-        title="action_card_batch_title_1",
+        name="action_card_batch_name_1",
         type=ActionCardType.INDIVIDUAL.value,
         actionCardIds=[action_card1.id, action_card2.id],
     )
 
     action_card_batch2 = ActionCardBatchModel(
         coachId=init_coach.id,
-        number=2,
-        title="action_card_batch_title_2",
+        name="action_card_batch_name_2",
         type=ActionCardType.COLLECTIVE.value,
         actionCardIds=[action_card3.id],
     )
@@ -125,7 +123,7 @@ def setup_data(init_coach, request):
     participant = ParticipantModel(user=user.userId, status="created")
 
     workshop = WorkshopModel(
-        title="workshop_title_1",
+        name="workshop_name_1",
         startAt=datetime(2020, 1, 1, 1, 1, 1),
         city="city_1",
         address="address1",
@@ -161,21 +159,21 @@ def test_get_workshop(client, auth, init_coach, setup_data):
     response_data, status_code = json.loads(response.data), response.status_code
     print(response_data)
     expected_output = {
-        "title": workshop.title,
+        "name": workshop.name,
         "startAt": workshop.startAt.isoformat(),
         "city": workshop.city,
         "address": workshop.address,
         "eventUrl": workshop.eventUrl,
         "coachId": workshop.coachId,
         "creatorId": workshop.creatorId,
-        "workshopId": workshop.id,
+        "id": workshop.id,
         "participants": [
             {
                 "status": "created",
                 "email": user.email,
                 "firstName": user.firstName,
                 "lastName": user.lastName,
-                "userId": user.userId,
+                "id": user.userId,
             }
         ],
         "model": {
@@ -185,9 +183,9 @@ def test_get_workshop(client, auth, init_coach, setup_data):
             "footprintStructure": model.footprintStructure,
             "actionCards": [
                 {
-                    "actionCardId": action_card.actionCardId,
-                    "number": action_card.number,
-                    "title": action_card.title,
+                    "id": action_card.actionCardId,
+                    "cardNumber": action_card.cardNumber,
+                    "name": action_card.name,
                     "category": action_card.category,
                     "type": action_card.type,
                     "key": action_card.key,
@@ -198,9 +196,8 @@ def test_get_workshop(client, auth, init_coach, setup_data):
             ],
             "actionCardBatches": [
                 {
-                    "actionCardBatchId": action_card_batch.actionCardBatchId,
-                    "number": action_card_batch.number,
-                    "title": action_card_batch.title,
+                    "id": action_card_batch.actionCardBatchId,
+                    "name": action_card_batch.name,
                     "type": action_card_batch.type,
                     "actionCardIds": action_card_batch.actionCardIds,
                 }
@@ -246,5 +243,5 @@ def test_delete_participant_workshop(client, auth, init_coach, setup_data, reque
     status_code = response.status_code
 
     workshop.reload()
-    assert status_code == 200
+    assert status_code == 204
     assert len(workshop.participants) == 0

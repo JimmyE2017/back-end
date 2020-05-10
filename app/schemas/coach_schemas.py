@@ -6,7 +6,7 @@ from app.schemas import CustomSchema
 
 
 class CoachSchema(CustomSchema):
-    userId = fields.Str(dump_only=True)
+    id = fields.Str(dump_only=True)
     firstName = fields.Str(required=True, validate=validate.Length(min=1, max=64))
     lastName = fields.Str(required=True, validate=validate.Length(min=1, max=64))
     email = fields.Email(required=True, max=256)
