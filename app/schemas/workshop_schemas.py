@@ -1,8 +1,16 @@
-from marshmallow import ValidationError, fields, post_dump, post_load, validate
+from marshmallow import (
+    ValidationError,
+    fields,
+    post_dump,
+    post_load,
+    pre_dump,
+    validate,
+)
 
 from app.models.coach_model import CoachModel
 from app.schemas import CustomSchema
 from app.schemas.action_card_schemas import ActionCardBatchSchema, ActionCardSchema
+from app.schemas.user_schemas import UserSchema
 
 
 class WorkshopSchema(CustomSchema):
@@ -27,6 +35,17 @@ class WorkshopSchema(CustomSchema):
         return data
 
 
+class WorkshopParticipantSchema(CustomSchema):
+    status = fields.Str()
+    user = fields.Nested(UserSchema)
+
+    @post_dump
+    def flatten_participant(self, data, **kwargs):
+        data = {**data, **data["user"]}
+        del data["user"]
+        return data
+
+
 class WorkshopModelSchema(CustomSchema):
     id = fields.Str()
     footprintStructure = fields.Dict()
@@ -37,8 +56,8 @@ class WorkshopModelSchema(CustomSchema):
 
 
 class WorkshopDetailSchema(WorkshopSchema):
+    participants = fields.List(fields.Nested(WorkshopParticipantSchema))
     model = fields.Nested(WorkshopModelSchema)
-    # participants = fields.List(fields.Nested(WorkshopParticipantSchema))
 
     @post_dump
     def sort_model_action_cards(self, data, **kwargs):
