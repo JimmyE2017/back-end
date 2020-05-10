@@ -56,6 +56,7 @@ class UserModel(db.Document):
     role = db.ListField(db.StringField(max_length=32), required=True)
     createdAt = db.DateTimeField(default=datetime.datetime.utcnow)
     updatedAt = db.DateTimeField(default=datetime.datetime.utcnow)
+    workshopParticipations = db.ListField(db.StringField())
 
     def __str__(self):
         return f"User {self.userId} - {self.firstName} {self.lastName}"
