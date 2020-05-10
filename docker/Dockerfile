@@ -1,4 +1,4 @@
-FROM python:3.8-slim
+FROM python:3.7-slim
 ARG API_HOME=/usr/src
 
 COPY . ${API_HOME}
