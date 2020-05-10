@@ -1,10 +1,12 @@
+import json
 import os
 from csv import DictReader
 
 from werkzeug.security import check_password_hash
 
-from app.cli import create_admin, importcsv
+from app.cli import create_admin, importcsv, importjson
 from app.models.action_card_model import ActionCardBatchModel, ActionCardModel
+from app.models.model_model import Model
 from app.models.user_model import UserModel
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -154,5 +156,63 @@ def test_importcsv_with_list_fields(cli_runner, db, request):
 
     def teardown():
         ActionCardBatchModel.drop_collection()
+
+    request.addfinalizer(teardown)
+
+
+def test_importjson_with_drop(cli_runner, db, request):
+    collection = "models"
+    json_file = "{}/ressources/json/models.json.example".format(BASE_DIR)
+
+    # Inserting an action card beforehand
+    model1 = Model(
+        footprintStructure={"footprint_category_1": "variable_1"},
+        variableFormulas={"variable_1": {"+": [{"var": "global_variable_name"}, 1295]}},
+        globalCarbonVariables={"global_variable_name": 42},
+    )
+    model1.save()
+
+    with open(json_file, "r") as fr:
+        json_data = json.load(fr)
+    count = len(json_data) if isinstance(json_data, list) else 1
+
+    result = cli_runner.invoke(importjson, ["--drop", collection, json_file])
+    assert (
+        "Successfully inserted {} objects in collection {}".format(count, collection)
+        in result.output
+    )
+    assert len(Model.objects()) == count
+
+    def teardown():
+        Model.drop_collection()
+
+    request.addfinalizer(teardown)
+
+
+def test_importjson_without_drop(cli_runner, db, request):
+    collection = "models"
+    json_file = "{}/ressources/json/models.json.example".format(BASE_DIR)
+
+    # Inserting an action card beforehand
+    model1 = Model(
+        footprintStructure={"footprint_category_1": "variable_1"},
+        variableFormulas={"variable_1": {"+": [{"var": "global_variable_name"}, 1295]}},
+        globalCarbonVariables={"global_variable_name": 42},
+    )
+    model1.save()
+
+    with open(json_file, "r") as fr:
+        json_data = json.load(fr)
+    count = len(json_data) if isinstance(json_data, list) else 1
+
+    result = cli_runner.invoke(importjson, ["--no-drop", collection, json_file])
+    assert (
+        "Successfully inserted {} objects in collection {}".format(count, collection)
+        in result.output
+    )
+    assert len(Model.objects()) == count + 1
+
+    def teardown():
+        Model.drop_collection()
 
     request.addfinalizer(teardown)
