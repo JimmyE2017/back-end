@@ -26,12 +26,6 @@ ACCESS_LEVEL = {
     Roles.ADMIN.value: 3,
 }
 
-MAPPING_ROLES_CLASS = {
-    Roles.PARTICIPANT.value: "UserModel.ParticipantModel",
-    Roles.COACH.value: "UserModel.CoachModel",
-    Roles.ADMIN.value: "UserModel.CoachModel",
-}
-
 
 class BlacklistTokenModel(db.Document):
     meta = {"collection": "blacklistedTokens"}
