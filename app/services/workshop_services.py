@@ -1,8 +1,9 @@
 from flask_jwt_extended import get_jwt_identity
 
-from app.common.errors import EntityNotFoundError
+from app.common.errors import EntityNotFoundError, InvalidDataError
 from app.models.action_card_model import ActionCardBatchModel, ActionCardModel
 from app.models.model_model import Model
+from app.models.user_model import UserModel
 from app.models.workshop_model import WorkshopModel
 from app.schemas.workshop_schemas import WorkshopDetailSchema, WorkshopSchema
 
@@ -34,10 +35,17 @@ def get_workshops() -> (dict, int):
 
 
 def create_workshop(data: bytes) -> (dict, int):
+    # Deserialize data
     schema = WorkshopSchema()
     data, err_msg, err_code = schema.loads_or_400(data)
     if err_msg:
         return err_msg, err_code
+
+    # Check existence of given coachId
+    coach_id = data["coachId"]
+    coach = UserModel.find_by_id(coach_id)
+    if coach is None:
+        raise InvalidDataError("Coach does not exist : {}".format(coach_id))
 
     workshop = WorkshopModel(**data)
     # Append creator id

@@ -40,7 +40,7 @@ def test_create_admin(cli_runner, db, request):
     request.addfinalizer(teardown)
 
 
-def test_create_admin_already_existing(cli_runner, init_admin):
+def test_create_admin_already_existing(cli_runner, admin):
     first_name = "admin first name"
     last_name = "admin last name"
     email = "admin@test.com"

@@ -1,6 +1,5 @@
-from marshmallow import ValidationError, fields, post_dump, post_load, validate
+from marshmallow import fields, post_dump, validate
 
-from app.models.user_model import UserModel
 from app.schemas import CustomSchema
 from app.schemas.action_card_schemas import ActionCardBatchSchema, ActionCardSchema
 from app.schemas.user_schemas import ParticipantSchema
@@ -15,17 +14,6 @@ class WorkshopSchema(CustomSchema):
     city = fields.Str(required=True, validate=validate.Length(max=128))
     address = fields.Str(validate=validate.Length(max=512))
     eventUrl = fields.Str(validate=validate.Length(max=1024))
-
-    @post_load
-    def check_coach_id_exist(self, data, **kwargs):
-        coach_id = data["coachId"]
-        coach = UserModel.find_by_id(coach_id)
-        if coach is None:
-            raise ValidationError(
-                "Coach does not exist : {}".format(coach_id), "coachId"
-            )
-
-        return data
 
 
 class WorkshopParticipantSchema(CustomSchema):
