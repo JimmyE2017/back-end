@@ -404,6 +404,8 @@ def workshop(db, coach, model, participant, request):
         participants=[workshop_participant],
     )
     workshop.save()
+    participant.workshopParticipations.append(workshop.id)
+    participant.save()
 
     def teardown():
         workshop.delete()
