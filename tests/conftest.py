@@ -8,8 +8,7 @@ from app import create_app
 from app.common.mail import mail as _mail
 from app.models import db as _db
 from app.models.city_model import Cities
-from app.models.coach_model import CoachModel
-from app.models.user_model import Roles
+from app.models.user_model import Roles, UserModel
 
 
 @pytest.fixture(scope="session")
@@ -71,7 +70,7 @@ def init_admin(db, request):
     Create an admin for the scope of a function
     Remove it at the end
     """
-    admin = CoachModel(
+    admin = UserModel(
         firstName="admin_first_name",
         lastName="admin_last_name",
         email="admin@test.com",
@@ -92,7 +91,7 @@ def init_admin(db, request):
 
 @pytest.fixture(scope="function")
 def init_coach(db, request):
-    coach = CoachModel(
+    coach = UserModel(
         firstName="coach_first_name",
         lastName="coach_last_name",
         email="coach@test.com",

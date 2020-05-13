@@ -8,8 +8,7 @@ from app.common.errors import (
     UserAlreadyExistsError,
 )
 from app.models.city_model import Cities
-from app.models.coach_model import CoachModel
-from app.models.user_model import Roles
+from app.models.user_model import Roles, UserModel
 
 valid_coach_data = [
     dict(
@@ -118,7 +117,7 @@ invalid_coaches_data = [
 
 @pytest.fixture(scope="class")
 def create_some_coaches(db, request):
-    coach1 = CoachModel(
+    coach1 = UserModel(
         firstName="firstName1",
         lastName="lastName1",
         email="coach1@test.com",
@@ -127,7 +126,7 @@ def create_some_coaches(db, request):
         city=Cities.PARIS.value,
     )
 
-    coach2 = CoachModel(
+    coach2 = UserModel(
         firstName="firstName2",
         lastName="lastName2",
         email="coach2@test.com",
@@ -136,7 +135,7 @@ def create_some_coaches(db, request):
         city=Cities.PARIS.value,
     )
 
-    coach3 = CoachModel(
+    coach3 = UserModel(
         firstName="firstName3",
         lastName="lastName3",
         email="coach3@test.com",
@@ -200,7 +199,7 @@ class TestCoachRessourcesWithExistingData:
 
 
 def test_delete_coaches(client, auth, init_admin, request):
-    coach = CoachModel(
+    coach = UserModel(
         firstName="firstName1",
         lastName="lastName1",
         email="coach1@test.com",
@@ -214,7 +213,7 @@ def test_delete_coaches(client, auth, init_admin, request):
     response = client.delete(f"/api/v1/coaches/{coach.id}", headers=headers)
 
     assert response.status_code == 204
-    assert CoachModel.find_by_id(user_id=coach.id) is None
+    assert UserModel.find_by_id(user_id=coach.id) is None
 
     def teardown():
         coach.delete()
@@ -247,10 +246,10 @@ def test_post_coaches_with_valid_data(client, auth, init_admin, data, request):
     response = client.post("/api/v1/coaches", headers=headers, data=json.dumps(data))
 
     assert response.status_code == 200
-    assert CoachModel.find_by_email(data["email"]) is not None
+    assert UserModel.find_by_email(data["email"]) is not None
 
     def teardown():
-        coach = CoachModel.find_by_email(data["email"])
+        coach = UserModel.find_by_email(data["email"])
         coach.delete()
 
     request.addfinalizer(teardown)
@@ -263,7 +262,7 @@ def test_post_coaches_with_invalid_data(client, auth, init_admin, data):
     response = client.post("/api/v1/coaches", headers=headers, data=json.dumps(data))
 
     assert response.status_code == 400
-    assert CoachModel.find_by_email(data.get("email", "")) is None
+    assert UserModel.find_by_email(data.get("email", "")) is None
 
 
 def test_post_coaches_with_empty_body(client, auth, init_admin):

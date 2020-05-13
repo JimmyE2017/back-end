@@ -4,7 +4,7 @@ from flask_jwt_extended import get_jwt_identity
 
 from app.common.errors import EntityNotFoundError, PermissionDeniedError
 from app.models.action_card_model import ActionCardBatchModel, ActionCardModel
-from app.models.coach_model import CoachModel
+from app.models.user_model import UserModel
 from app.schemas.action_card_schemas import ActionCardBatchSchema, ActionCardSchema
 
 
@@ -15,7 +15,7 @@ def get_all_action_cards() -> (dict, int):
 
 def get_coach_action_card_batches(coach_id: str) -> (dict, int):
     # Check if given coach_id exists in DB
-    coach = CoachModel.find_by_id(user_id=coach_id)
+    coach = UserModel.find_coach_by_id(user_id=coach_id)
     if coach is None:
         raise EntityNotFoundError
 
@@ -25,14 +25,16 @@ def get_coach_action_card_batches(coach_id: str) -> (dict, int):
 
 
 def update_coach_action_card_batches(coach_id: str, data: bytes) -> (dict, int):
+    # Check if given coach_id exists in DB
+    coach = UserModel.find_coach_by_id(user_id=coach_id)
+    if coach is None:
+        raise EntityNotFoundError(msg="Coach does not exist")
+
     # Prevent another coach from updating another coach action card batches
     if coach_id != get_jwt_identity():
-        raise PermissionDeniedError
-
-    # Check if given coach_id exists in DB
-    coach = CoachModel.find_by_id(user_id=coach_id)
-    if coach is None:
-        raise EntityNotFoundError
+        raise PermissionDeniedError(
+            msg="You can't update the action card batches of another coach !"
+        )
 
     # Validate and serialize data
     schema = ActionCardBatchSchema(many=True)

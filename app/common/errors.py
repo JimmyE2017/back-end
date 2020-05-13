@@ -11,9 +11,15 @@ class CustomException(Exception):
     error_type = None
     msg = ""
     code = 500
+    details = None
 
-    def __init__(self, details: dict = None):
-        self.details = details
+    def __init__(self, msg: str = None, code: int = None, details: dict = None):
+        if details:
+            self.details = details
+        if msg:
+            self.msg = msg
+        if code:
+            self.code = code
 
     def get_content(self) -> dict:
         content = {"msg": f"{self.error_type.value}: {self.msg}"}

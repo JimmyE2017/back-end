@@ -9,8 +9,7 @@ from app.models.action_card_model import (
     ActionCardType,
 )
 from app.models.city_model import Cities
-from app.models.coach_model import CoachModel
-from app.models.user_model import Roles
+from app.models.user_model import Roles, UserModel
 
 
 @pytest.fixture(scope="class")
@@ -346,6 +345,6 @@ class TestActionCardsRessourcesWithExistingData:
         assert create_some_action_card_batches[2].name == action_card_batches[0].name
 
         def teardown():
-            CoachModel.find_by_id(coach_id).delete()
+            UserModel.find_coach_by_id(coach_id).delete()
 
         request.addfinalizer(teardown)

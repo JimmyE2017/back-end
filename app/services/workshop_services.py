@@ -3,10 +3,7 @@ from flask_jwt_extended import get_jwt_identity
 from app.common.errors import EntityNotFoundError
 from app.models.action_card_model import ActionCardBatchModel, ActionCardModel
 from app.models.model_model import Model
-from app.models.participant_model import ParticipantModel
-from app.models.user_model import UserModel
 from app.models.workshop_model import WorkshopModel
-from app.schemas.user_schemas import UserSchema
 from app.schemas.workshop_schemas import WorkshopDetailSchema, WorkshopSchema
 
 
@@ -65,55 +62,3 @@ def delete_workshop(workshop_id: str) -> (dict, int):
     workshop.delete()
 
     return {}, 204
-
-
-def add_participant(workshop_id, user_data) -> (dict, int):
-    workshop = WorkshopModel.find_by_id(workshop_id=workshop_id)
-    user_data, err_msg, err_code = UserSchema().loads_or_400(user_data)
-    if err_msg:
-        return err_msg, err_code
-    # Check if given workshop_id exists in DB
-    if workshop is None:
-        raise EntityNotFoundError
-    user = UserModel.find_by_email(user_data.get("email"))
-    participant = None
-    if user is None:
-        user = UserModel(
-            email=user_data.get("email"),
-            firstName=user_data.get("firstName"),
-            lastName=user_data.get("lastName"),
-            role=["participant"],
-        )
-        user.save()
-        status = "created"
-    else:
-        status = "existing"
-    user.reload()
-    participant = ParticipantModel(user=user.userId, status=status)
-    if workshop_id not in user.workshopParticipations:
-        user.workshopParticipations.append(workshop_id)
-        workshop.participants.append(participant)
-    user.save()
-    workshop.save()
-    return UserSchema().dump(user), 200
-
-
-def remove_participant(workshop_id, participant_id) -> (dict, int):
-    workshop = WorkshopModel.find_by_id(workshop_id=workshop_id)
-    user = UserModel.find_by_id(participant_id)
-    # Check if given workshop_id exists in DB
-    if workshop is None or user is None:
-        raise EntityNotFoundError
-    updated_participants = []
-    for participant in workshop.participants:
-        if participant.user.userId != participant_id:
-            updated_participants.append(participant)
-    workshop.participants = updated_participants
-    updated_workshop = []
-    for registered in user.workshopParticipations:
-        if registered != workshop_id:
-            updated_workshop.append(registered)
-    user.workshopParticipations = updated_workshop
-    workshop.save()
-    user.save()
-    return None, 204
