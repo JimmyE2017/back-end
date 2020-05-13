@@ -32,7 +32,7 @@ def create_coach(data: bytes) -> (dict, int):
     role = data.pop("role")
 
     # Check if user already exist
-    user = UserModel.find_coach_by_email(data["email"])
+    user = UserModel.find_by_email(data["email"])
     if user is not None:
         if Roles.COACH.value in user.role:
             # raise exception if user is already a coach
@@ -53,7 +53,7 @@ def create_coach(data: bytes) -> (dict, int):
         user.password = generate_password_hash(user.password)
 
     # Create user in DB
-    user.save(force_insert=True)
+    user.save()
 
     # Generate default action card batches
     default_action_card_batches = ActionCardBatchModel.find_default_batches()

@@ -85,7 +85,6 @@ def test_delete_coaches(client, auth, admin, coach, request):
 
 
 def test_delete_inexisting_coach(client, auth, admin):
-
     headers = auth.login(email="admin@test.com")
     response = client.delete(f"/api/v1/coaches/inexistingId", headers=headers)
 
@@ -126,3 +125,21 @@ def test_post_coaches_with_empty_body(client, auth, admin):
 
     assert response_data == EmptyBodyError().get_content()
     assert status_code == EmptyBodyError.code
+
+
+def test_create_coach_from_participant(client, auth, admin, participant):
+    data = dict(
+        firstName=participant.firstName,
+        lastName=participant.lastName,
+        email=participant.email,
+        password="password",
+        role=Roles.COACH.value,
+        city=Cities.PARIS.value,
+    )
+
+    headers = auth.login(email="admin@test.com")
+    response = client.post("/api/v1/coaches", headers=headers, data=json.dumps(data))
+
+    participant.reload()
+    assert response.status_code == 200
+    assert Roles.COACH.value in participant.role
