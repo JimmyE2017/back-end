@@ -70,3 +70,6 @@ class WorkshopModel(db.Document):
         except db.DoesNotExist:
             workshops = []
         return workshops
+
+    def get_participant_ids(self) -> list:
+        return [p.user.id for p in self.participants]

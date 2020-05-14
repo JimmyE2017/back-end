@@ -14,6 +14,7 @@ from app.models.action_card_model import (
     ActionCardModel,
     ActionCardType,
 )
+from app.models.carbon_forms_model import CarbonFormAnswersModel
 from app.models.city_model import Cities
 from app.models.model_model import Model
 from app.models.user_model import Roles, UserModel
@@ -446,3 +447,20 @@ def workshops(db, request, coach):
 
     request.addfinalizer(teardown)
     return [workshop1, workshop2]
+
+
+@pytest.fixture(scope="function")
+def carbon_form_answers(db, request, workshop, participant):
+    carbon_form_answers = CarbonFormAnswersModel(
+        workshop=workshop.id,
+        participant=participant.id,
+        answers={"meat_per_day": 9000, "car_type": "futuristic"},
+    )
+
+    carbon_form_answers.save()
+
+    def teardown():
+        carbon_form_answers.delete()
+
+    request.addfinalizer(teardown)
+    return carbon_form_answers

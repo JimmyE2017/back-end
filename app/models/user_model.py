@@ -122,6 +122,14 @@ class UserModel(db.Document):
         return user
 
     @classmethod
+    def find_participant_by_email(cls, email: str) -> UserModel:
+        try:
+            user = cls.objects.get(email=email, role__in=[Roles.PARTICIPANT.value])
+        except db.DoesNotExist:
+            user = None
+        return user
+
+    @classmethod
     def find_all_coaches(cls) -> QuerySet:
         return cls.objects(role__in=[Roles.ADMIN.value, Roles.COACH.value]).all()
 
