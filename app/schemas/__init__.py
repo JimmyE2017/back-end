@@ -4,6 +4,9 @@ from app.common.errors import EmptyBodyError, InvalidDataError
 
 
 class CustomSchema(Schema):
+    class Meta:
+        ordered = True
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

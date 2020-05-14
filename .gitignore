@@ -35,9 +35,12 @@ coverage.xml
 
 # Environments
 venv/*.env
+venv/bin/*
+venv/include/*
 
 # Pycharm stuff
 .idea/
 
-# CSV files
+# Ressources files
 ressources/csv/*.csv
+ressources/json/*.json

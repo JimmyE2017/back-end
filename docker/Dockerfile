@@ -1,4 +1,5 @@
-FROM python:3.8-slim
+FROM python:3.7-slim
+ARG API_HOME=/usr/src
 
 ADD ./requirements.txt .
 RUN pip3 install -r requirements.txt

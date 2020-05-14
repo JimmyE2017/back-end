@@ -13,8 +13,8 @@ from app.common.errors import (
     InvalidTokenError,
 )
 from app.models.user_model import BlacklistTokenModel, Roles, UserModel
-from app.schemas.coach_schemas import CoachSchema
 from app.schemas.user_schemas import (
+    CoachSchema,
     ForgottenPasswordSchema,
     LoginSchema,
     NewPasswordSchema,

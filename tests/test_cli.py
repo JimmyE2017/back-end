@@ -1,10 +1,12 @@
+import json
 import os
 from csv import DictReader
 
 from werkzeug.security import check_password_hash
 
-from app.cli import create_admin, importcsv
+from app.cli import create_admin, importcsv, importjson
 from app.models.action_card_model import ActionCardBatchModel, ActionCardModel
+from app.models.model_model import Model
 from app.models.user_model import UserModel
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -38,7 +40,7 @@ def test_create_admin(cli_runner, db, request):
     request.addfinalizer(teardown)
 
 
-def test_create_admin_already_existing(cli_runner, init_admin):
+def test_create_admin_already_existing(cli_runner, admin):
     first_name = "admin first name"
     last_name = "admin last name"
     email = "admin@test.com"
@@ -71,8 +73,8 @@ def test_importcsv_no_drop(cli_runner, db, request):
 
     # Inserting an action card beforehand
     action_card4 = ActionCardModel(
-        number=4,
-        title="action_card_title_4",
+        cardNumber=4,
+        name="action_card_name_4",
         category="action_card_category_4",
         type="action_card_type_4",
         key="action_card_key_4",
@@ -106,8 +108,8 @@ def test_importcsv_with_drop(cli_runner, db, request):
 
     # Inserting an action card beforehand
     action_card4 = ActionCardModel(
-        number=4,
-        title="action_card_title_4",
+        cardNumber=4,
+        name="action_card_name_4",
         category="action_card_category_4",
         type="action_card_type_4",
         key="action_card_key_4",
@@ -154,5 +156,63 @@ def test_importcsv_with_list_fields(cli_runner, db, request):
 
     def teardown():
         ActionCardBatchModel.drop_collection()
+
+    request.addfinalizer(teardown)
+
+
+def test_importjson_with_drop(cli_runner, db, request):
+    collection = "models"
+    json_file = "{}/ressources/json/models.json.example".format(BASE_DIR)
+
+    # Inserting an action card beforehand
+    model1 = Model(
+        footprintStructure={"footprint_category_1": "variable_1"},
+        variableFormulas={"variable_1": {"+": [{"var": "global_variable_name"}, 1295]}},
+        globalCarbonVariables={"global_variable_name": 42},
+    )
+    model1.save()
+
+    with open(json_file, "r") as fr:
+        json_data = json.load(fr)
+    count = len(json_data) if isinstance(json_data, list) else 1
+
+    result = cli_runner.invoke(importjson, ["--drop", collection, json_file])
+    assert (
+        "Successfully inserted {} objects in collection {}".format(count, collection)
+        in result.output
+    )
+    assert len(Model.objects()) == count
+
+    def teardown():
+        Model.drop_collection()
+
+    request.addfinalizer(teardown)
+
+
+def test_importjson_without_drop(cli_runner, db, request):
+    collection = "models"
+    json_file = "{}/ressources/json/models.json.example".format(BASE_DIR)
+
+    # Inserting an action card beforehand
+    model1 = Model(
+        footprintStructure={"footprint_category_1": "variable_1"},
+        variableFormulas={"variable_1": {"+": [{"var": "global_variable_name"}, 1295]}},
+        globalCarbonVariables={"global_variable_name": 42},
+    )
+    model1.save()
+
+    with open(json_file, "r") as fr:
+        json_data = json.load(fr)
+    count = len(json_data) if isinstance(json_data, list) else 1
+
+    result = cli_runner.invoke(importjson, ["--no-drop", collection, json_file])
+    assert (
+        "Successfully inserted {} objects in collection {}".format(count, collection)
+        in result.output
+    )
+    assert len(Model.objects()) == count + 1
+
+    def teardown():
+        Model.drop_collection()
 
     request.addfinalizer(teardown)

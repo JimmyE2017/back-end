@@ -8,6 +8,7 @@ from app.common.errors import CustomException
 from app.models import db
 from app.models.action_card_model import ActionCardBatchModel, ActionCardModel
 from app.models.city_model import Cities
+from app.models.model_model import Model
 from app.models.user_model import Roles
 from app.services.coach_services import create_coach
 
@@ -15,6 +16,8 @@ MODELS_WITH_ENABLED_IMPORTCSV = {
     "actionCards": ActionCardModel,
     "actionCardBatches": ActionCardBatchModel,
 }
+
+MODELS_WITH_ENABLED_IMPORTJSON = {"models": Model}
 
 
 @click.command("create_admin")
@@ -106,4 +109,66 @@ def importcsv(collection, csv_file, drop):
     return
 
 
-cli_commands = [create_admin, importcsv]
+@click.command("importjson")
+@click.option(
+    "--drop/--no-drop",
+    default=False,
+    help="Whether to drop the collection beforehand or not",
+)
+@click.argument("collection")
+@click.argument("json_file", type=click.Path(exists=True))
+def importjson(collection, json_file, drop):
+    """ Import a JSON file into a given collection
+
+    COLLECTION is the name of the target mongo collection
+
+    JSON_FILE is the path to the file
+
+    If the json is not a list, only one document will be inserted.
+    """
+    if collection not in MODELS_WITH_ENABLED_IMPORTJSON:
+        click.echo(
+            click.style(
+                "Collection {} does not support importjson.".format(collection),
+                fg="red",
+            )
+        )
+        click.echo(
+            "Only the following collections support importjson : {}".format(
+                ", ".join([c for c in MODELS_WITH_ENABLED_IMPORTJSON.keys()])
+            )
+        )
+        raise Exception("Collection {} does not support importjson.".format(collection))
+
+    model = MODELS_WITH_ENABLED_IMPORTJSON[collection]
+
+    if drop:
+        click.echo("Dropping collection {}".format(collection))
+        model.drop_collection()
+    count = 0
+    json_data = None
+    with open(json_file, "r") as fr:
+        json_data = json.load(fr)
+
+    if isinstance(json_data, list):
+        for row in json_data:
+            data = model(**row)
+            data.save()
+            count += 1
+    else:
+        data = model(**json_data)
+        data.save()
+        count += 1
+
+    click.echo(
+        click.style(
+            "Successfully inserted {} objects in collection {}".format(
+                count, collection
+            ),
+            fg="green",
+        )
+    )
+    return
+
+
+cli_commands = [create_admin, importcsv, importjson]

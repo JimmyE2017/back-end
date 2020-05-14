@@ -20,8 +20,8 @@ class ActionCardModel(db.Document):
     meta = {"collection": "actionCards"}
 
     actionCardId = db.StringField(primary_key=True, default=generate_id)
-    number = db.IntField(required=True, min_value=0)
-    title = db.StringField(required=True)
+    cardNumber = db.IntField(required=True, min_value=0)
+    name = db.StringField(required=True)
     category = db.StringField(required=True)
     type = db.StringField(required=True)
     key = db.StringField(required=True)
@@ -40,8 +40,7 @@ class ActionCardBatchModel(db.Document):
 
     actionCardBatchId = db.StringField(primary_key=True, default=generate_id)
     coachId = db.StringField()
-    number = db.IntField(required=True, min_value=0)
-    title = db.StringField(required=True)
+    name = db.StringField(required=True)
     actionCardIds = db.ListField(db.StringField(), required=True)
     type = db.StringField(required=True)
     default = db.BooleanField()

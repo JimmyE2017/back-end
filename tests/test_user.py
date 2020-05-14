@@ -23,7 +23,7 @@ def _get_authorization_header(token):
     return {"Authorization": "Bearer {}".format(token)}
 
 
-def test_successful_login(client, init_admin):
+def test_successful_login(client, admin):
     data = {"email": "admin@test.com", "password": "password"}
 
     response = client.post("api/v1/login", data=json.dumps(data))
@@ -33,7 +33,7 @@ def test_successful_login(client, init_admin):
     assert "access_token" in response_data
 
 
-def test_unsuccessful_login_wrong_email(client, init_admin):
+def test_unsuccessful_login_wrong_email(client, admin):
     data = {"email": "email_that_does_not_exist@test.com", "password": "password"}
 
     response = client.post("api/v1/login", data=json.dumps(data))
@@ -42,7 +42,7 @@ def test_unsuccessful_login_wrong_email(client, init_admin):
     assert response_data == EmailNotFoundError().get_content()
 
 
-def test_unsuccessful_login_wrong_password(client, init_admin):
+def test_unsuccessful_login_wrong_password(client, admin):
     data = {"email": "admin@test.com", "password": "wrong_password"}
 
     response = client.post("api/v1/login", data=json.dumps(data))
@@ -51,7 +51,7 @@ def test_unsuccessful_login_wrong_password(client, init_admin):
     assert status_code == InvalidPasswordError.code
 
 
-def test_succesful_logout(client, auth, init_admin):
+def test_succesful_logout(client, auth, admin):
     headers = auth.login(email="admin@test.com")
 
     response = client.delete("api/v1/logout", headers=headers)
@@ -96,7 +96,7 @@ def test_with_invalid_token(client, db):
 
 
 # Request with revoked token
-def test_with_revoked_token(client, auth, init_admin):
+def test_with_revoked_token(client, auth, admin):
     headers = auth.login(email="admin@test.com")
     auth.logout(headers)
     response = client.delete("api/v1/logout", headers=headers)
@@ -106,7 +106,7 @@ def test_with_revoked_token(client, auth, init_admin):
     assert status_code == RevokedTokenError.code
 
 
-def test_access_level_too_low(client, auth, init_coach):
+def test_access_level_too_low(client, auth, coach):
     headers = auth.login(email="coach@test.com")
 
     # Try to access admin level endpoint
@@ -117,7 +117,7 @@ def test_access_level_too_low(client, auth, init_coach):
     assert response_data == PermissionDeniedError().get_content()
 
 
-def test_good_access_level(client, auth, init_coach):
+def test_good_access_level(client, auth, coach):
     headers = auth.login(email="coach@test.com")
 
     # Try to access admin level endpoint
@@ -126,16 +126,16 @@ def test_good_access_level(client, auth, init_coach):
     assert response.status_code == 200
 
 
-def test_forgotten_password_mail_sent(client, mail, init_coach):
+def test_forgotten_password_mail_sent(client, mail, coach):
     with mail.record_messages() as outbox:
-        data = {"email": init_coach.email}
+        data = {"email": coach.email}
         response = client.post("/api/v1/forgotten_password", data=json.dumps(data))
         assert response.status_code == 204
         assert len(outbox) == 1
         assert outbox[0].subject == password_reset_schema["subject"]
 
 
-def test_forgotten_password_invalid_data(client, init_coach):
+def test_forgotten_password_invalid_data(client, coach):
     data = {"email": "nonexistingemail@test.com"}
 
     response = client.post("/api/v1/forgotten_password", data=json.dumps(data))
@@ -145,25 +145,25 @@ def test_forgotten_password_invalid_data(client, init_coach):
     assert response_data == EmailNotFoundError().get_content()
 
 
-def test_reset_password(client, init_coach):
+def test_reset_password(client, coach):
     data = {"password": "new_password"}
 
-    token = init_coach.send_reset_password_mail()
+    token = coach.send_reset_password_mail()
 
     response = client.post(
         "/api/v1/reset_password",
         data=json.dumps(data),
         query_string={"access_token": token},
     )
-    init_coach = UserModel.find_by_id(user_id=init_coach.id)
+    coach = UserModel.find_by_id(user_id=coach.id)
     assert response.status_code == 204
-    assert check_password_hash(pwhash=init_coach.password, password="new_password")
+    assert check_password_hash(pwhash=coach.password, password="new_password")
 
 
-def test_reset_password_invalid_token(client, init_coach):
+def test_reset_password_invalid_token(client, coach):
     data = {"password": "new_d"}  # Password too short
 
-    init_coach.send_reset_password_mail()
+    coach.send_reset_password_mail()
 
     response = client.post(
         "/api/v1/reset_password",
@@ -176,10 +176,10 @@ def test_reset_password_invalid_token(client, init_coach):
     assert response_data == InvalidTokenError().get_content()
 
 
-def test_reset_password_invalid_new_password(client, init_coach):
+def test_reset_password_invalid_new_password(client, coach):
     data = {"password": "new_d"}  # Password too short
 
-    token = init_coach.send_reset_password_mail()
+    token = coach.send_reset_password_mail()
 
     response = client.post(
         "/api/v1/reset_password",
@@ -190,7 +190,7 @@ def test_reset_password_invalid_new_password(client, init_coach):
     assert response.status_code == InvalidDataError.code
 
 
-def test_user_me(client, auth, init_coach):
+def test_user_me(client, auth, coach):
     headers = auth.login(email="coach@test.com")
     # Try to access admin level endpoint
     response = client.get("/api/v1/users/me", headers=headers)

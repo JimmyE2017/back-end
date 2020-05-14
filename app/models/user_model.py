@@ -5,6 +5,7 @@ from enum import Enum
 
 from flask import current_app
 from flask_jwt_extended import create_access_token
+from mongoengine import QuerySet
 
 from app.common.mail.mail_services import send_reset_password_mail
 from app.common.uuid_generator import generate_id
@@ -41,13 +42,10 @@ class BlacklistTokenModel(db.Document):
 
 
 class UserModel(db.Document):
-    """
-    This is an abstract class.
-    Please inherit from it if you want to create a new type of user
-    """
 
-    meta = {"collection": "users", "allow_inheritance": True}
+    meta = {"collection": "users"}
 
+    # User specific fields
     userId = db.StringField(primary_key=True, default=generate_id)
     firstName = db.StringField(required=True, max_length=64, min_length=1)
     lastName = db.StringField(required=True, max_length=64, min_length=1)
@@ -56,6 +54,14 @@ class UserModel(db.Document):
     role = db.ListField(db.StringField(max_length=32), required=True)
     createdAt = db.DateTimeField(default=datetime.datetime.utcnow)
     updatedAt = db.DateTimeField(default=datetime.datetime.utcnow)
+
+    # Coach specific fields
+    city = db.StringField(max_length=256)
+    workshopsCount = db.IntField()
+    awarenessRaisedCount = db.IntField()
+
+    # Participant specific fields
+    workshopParticipations = db.ListField(db.StringField(), default=[])
 
     def __str__(self):
         return f"User {self.userId} - {self.firstName} {self.lastName}"
@@ -94,3 +100,38 @@ class UserModel(db.Document):
         except db.DoesNotExist:
             user = None
         return user
+
+    @classmethod
+    def find_coach_by_id(cls, user_id: str) -> UserModel:
+        try:
+            user = cls.objects.get(
+                userId=user_id, role__in=[Roles.ADMIN.value, Roles.COACH.value]
+            )
+        except db.DoesNotExist:
+            user = None
+        return user
+
+    @classmethod
+    def find_coach_by_email(cls, email: str) -> UserModel:
+        try:
+            user = cls.objects.get(
+                email=email, role__in=[Roles.ADMIN.value, Roles.COACH.value]
+            )
+        except db.DoesNotExist:
+            user = None
+        return user
+
+    @classmethod
+    def find_all_coaches(cls) -> QuerySet:
+        return cls.objects(role__in=[Roles.ADMIN.value, Roles.COACH.value]).all()
+
+    def add_participant_role(self) -> None:
+        """
+        To use when we want to update the role of the user to participant.
+        Init data specific to the participant
+        :return:
+        """
+        self.role.append(Roles.PARTICIPANT.value)
+        self.workshopParticipations = []
+
+        return
