@@ -4,13 +4,15 @@ from flask_jwt_extended import jwt_required
 
 from app.common.access_level import requires_access_level
 from app.models.user_model import Roles
-from app.services.workshop_services import (
+from app.services.workshop_participants_services import (
     add_participant,
+    remove_participant,
+)
+from app.services.workshop_services import (
     create_workshop,
     delete_workshop,
     get_workshop,
     get_workshops,
-    remove_participant,
 )
 
 
@@ -58,5 +60,5 @@ class WorkshopParticipantListView(MethodView):
     @requires_access_level(Roles.COACH)
     def post(self, workshop_id):
         data = request.data
-        response, code = add_participant(workshop_id=workshop_id, user_data=data)
+        response, code = add_participant(workshop_id=workshop_id, data=data)
         return make_response(jsonify(response), code)

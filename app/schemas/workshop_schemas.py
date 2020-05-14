@@ -1,9 +1,8 @@
-from marshmallow import ValidationError, fields, post_dump, post_load, validate
+from marshmallow import fields, post_dump, validate
 
-from app.models.coach_model import CoachModel
 from app.schemas import CustomSchema
 from app.schemas.action_card_schemas import ActionCardBatchSchema, ActionCardSchema
-from app.schemas.user_schemas import UserSchema
+from app.schemas.user_schemas import ParticipantSchema
 
 
 class WorkshopSchema(CustomSchema):
@@ -16,21 +15,12 @@ class WorkshopSchema(CustomSchema):
     address = fields.Str(validate=validate.Length(max=512))
     eventUrl = fields.Str(validate=validate.Length(max=1024))
 
-    @post_load
-    def check_coach_id_exist(self, data, **kwargs):
-        coach_id = data["coachId"]
-        coach = CoachModel.find_by_id(coach_id)
-        if coach is None:
-            raise ValidationError(
-                "Coach does not exist : {}".format(coach_id), "coachId"
-            )
-
-        return data
-
 
 class WorkshopParticipantSchema(CustomSchema):
     status = fields.Str()
-    user = fields.Nested(UserSchema)
+    user = fields.Nested(
+        ParticipantSchema, only=("id", "firstName", "lastName", "email")
+    )
 
     @post_dump
     def flatten_participant(self, data, **kwargs):

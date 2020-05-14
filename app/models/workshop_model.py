@@ -1,11 +1,26 @@
 from __future__ import annotations
 
 import datetime
+from enum import Enum
 
 from app.common.uuid_generator import generate_id
 from app.models import db
 from app.models.model_model import Model
-from app.models.participant_model import ParticipantModel
+from app.models.user_model import UserModel
+
+
+class WorkshopParticipantStatus(Enum):
+    CREATED = "created"
+    EXISTING = "existing"
+    FORMSENT = "formsent"
+    TOCHECK = "tocheck"
+    READY = "ready"
+
+
+class WorkshopParticipantModel(db.EmbeddedDocument):
+
+    user = db.ReferenceField(UserModel)
+    status = db.StringField(max_length=32)
 
 
 class WorkshopModel(db.Document):
@@ -28,7 +43,9 @@ class WorkshopModel(db.Document):
     eventUrl = db.StringField(default="caplc.com")
     city = db.StringField(max_length=128, min_length=1)
     address = db.StringField(max_length=512)
-    participants = db.ListField(db.EmbeddedDocumentField(ParticipantModel), default=[])
+    participants = db.ListField(
+        db.EmbeddedDocumentField(WorkshopParticipantModel), default=[]
+    )
     model = db.ReferenceField(Model, db_field="modelId")
 
     def __repr__(self):

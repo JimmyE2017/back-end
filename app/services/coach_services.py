@@ -2,13 +2,12 @@ from werkzeug.security import generate_password_hash
 
 from app.common.errors import EntityNotFoundError, UserAlreadyExistsError
 from app.models.action_card_model import ActionCardBatchModel
-from app.models.coach_model import CoachModel
-from app.models.user_model import Roles
-from app.schemas.coach_schemas import CoachSchema
+from app.models.user_model import Roles, UserModel
+from app.schemas.user_schemas import CoachSchema
 
 
 def get_coach(coach_id) -> (dict, int):
-    coach = CoachModel.find_by_id(user_id=coach_id)
+    coach = UserModel.find_coach_by_id(user_id=coach_id)
 
     # Check if given coach_id exists in DB
     if coach is None:
@@ -19,7 +18,7 @@ def get_coach(coach_id) -> (dict, int):
 
 def get_all_coachs() -> (dict, int):
     # Get all coachs
-    coachs = CoachModel.find_all_coaches()
+    coachs = UserModel.find_all_coaches()
     schema = CoachSchema(many=True)
     return schema.dump(coachs), 200
 
@@ -33,7 +32,7 @@ def create_coach(data: bytes) -> (dict, int):
     role = data.pop("role")
 
     # Check if user already exist
-    user = CoachModel.find_by_email(data["email"])
+    user = UserModel.find_by_email(data["email"])
     if user is not None:
         if Roles.COACH.value in user.role:
             # raise exception if user is already a coach
@@ -42,7 +41,7 @@ def create_coach(data: bytes) -> (dict, int):
             # Otherwise, update role
             user.role.append(Roles.COACH.value)
     else:
-        user = CoachModel(**data)
+        user = UserModel(**data)
         user.role = [Roles.COACH.value]
 
     # Setting admin role if needed
@@ -54,7 +53,7 @@ def create_coach(data: bytes) -> (dict, int):
         user.password = generate_password_hash(user.password)
 
     # Create user in DB
-    user.save(force_insert=True)
+    user.save()
 
     # Generate default action card batches
     default_action_card_batches = ActionCardBatchModel.find_default_batches()
@@ -70,7 +69,7 @@ def create_coach(data: bytes) -> (dict, int):
 
 
 def delete_coach(coach_id: str) -> (dict, int):
-    coach = CoachModel.find_by_id(user_id=coach_id)
+    coach = UserModel.find_coach_by_id(user_id=coach_id)
 
     # Check if given coach_id exists in DB
     if coach is None:
