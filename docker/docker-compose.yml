@@ -1,0 +1,38 @@
+version: '3.7'
+
+services:
+  api:
+    build:
+      context: ../.
+      dockerfile: docker/Dockerfile
+    ports:
+      - 5001:5000
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP="app:create_app('local')"
+      - SECRET_KEY=my_precious_secret_key
+      - PREFERRED_URL_SCHEME=http://example.com
+      - FLASK_CONFIG=local
+      - MONGODB_USERNAME=caplc_user
+      - MONGODB_PASSWORD=password123
+      - MONGODB_DB=caplcDB
+      - MONGODB_HOST=mongodb
+      - MONGODB_PORT=27017
+      - MAIL_SERVER=localhost
+      - MAIL_PORT=25
+      - MAIL_USE_TLS=0
+      - MAIL_USE_SSL=0
+      - MAIL_USERNAME=example@test.com
+      - MAIL_PASSWORD=mypassword
+      - MAIL_DEFAULT_SENDER=example@test.com
+    depends_on:
+      - mongodb
+  mongodb:
+    image: mongo:4.2.5
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongocaplc
+      - MONGO_INITDB_ROOT_PASSWORD=mongocaplc
+      - MONGO_INITDB_DATABASE=caplcDB
+    volumes:
+      - $PWD/docker/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
+    command: mongod --auth
