@@ -19,7 +19,7 @@ class WorkshopParticipantStatus(Enum):
 
 class WorkshopParticipantModel(db.EmbeddedDocument):
 
-    user = db.ReferenceField(UserModel)
+    user = db.ReferenceField(UserModel, db_field="userId")
     status = db.StringField(max_length=32)
 
 
@@ -73,3 +73,10 @@ class WorkshopModel(db.Document):
 
     def get_participant_ids(self) -> list:
         return [p.user.id for p in self.participants]
+
+    def get_workshop_participant(self, participant_id: str):
+        for workshop_participant in self.participants:
+            if workshop_participant.user.id == participant_id:
+                return workshop_participant
+
+        return None

@@ -1,7 +1,7 @@
 from app.common.errors import EntityNotFoundError, InvalidDataError
 from app.models.carbon_forms_model import CarbonFormAnswersModel
 from app.models.user_model import UserModel
-from app.models.workshop_model import WorkshopModel
+from app.models.workshop_model import WorkshopModel, WorkshopParticipantStatus
 from app.schemas.carbon_forms_schemas import CarbonFormAnswersSchema
 
 
@@ -36,11 +36,16 @@ def create_carbon_form_answers(workshop_id: str, data: bytes) -> (dict, int):
             "Participant has already answered to the carbon form for this workshop"
         )
 
+    # Update participant status
+    wp = workshop.get_workshop_participant(participant_id=user.id)
+    wp.status = WorkshopParticipantStatus.TOCHECK.value
+
     # Save data
     carbon_form_answers = CarbonFormAnswersModel(
         workshop=workshop.id, participant=user.id, answers=data["answers"],
     )
     carbon_form_answers.save()
+    workshop.save()
 
     carbon_form_answers.reload()
     return schema.dump(carbon_form_answers), 200

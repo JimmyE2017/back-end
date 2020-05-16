@@ -2,6 +2,7 @@ import json
 
 from app.common.errors import EntityNotFoundError, InvalidDataError
 from app.models.carbon_forms_model import CarbonFormAnswersModel
+from app.models.workshop_model import WorkshopParticipantStatus
 
 
 def test_post_carbon_form_answers(client, workshop, participant):
@@ -24,9 +25,12 @@ def test_post_carbon_form_answers(client, workshop, participant):
         "answers": {"meat_per_day": 9000, "car_type": "futuristic"},
     }
 
+    workshop.reload()
+
     assert status_code == 200
     assert len(CarbonFormAnswersModel.objects) == count + 1
     assert response_data == expected_result
+    assert workshop.participants[0].status == WorkshopParticipantStatus.TOCHECK.value
 
 
 def test_post_carbon_form_answers_inexisting_workshop(client):
