@@ -1,5 +1,6 @@
 from app.api.ping import PingView
 from app.api.v1.action_card_views import ActionCardBatchView, ActionCardListView
+from app.api.v1.carbon_forms_views import CarbonFormAnswersView
 from app.api.v1.coach_views import CoachListView, CoachView
 from app.api.v1.user_views import (
     ForgottenPasswordView,
@@ -80,5 +81,11 @@ urlpatterns = [
         "participants/<string:participant_id>",
         endpoint="workshop-participant",
         methods=["DELETE"],
+    ),
+    dict(
+        view=CarbonFormAnswersView,
+        url="/api/v1/carbon_forms/<string:workshop_id>",
+        endpoint="carbon-forms",
+        methods=["POST"],
     ),
 ]
