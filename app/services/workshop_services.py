@@ -2,6 +2,7 @@ from flask_jwt_extended import get_jwt_identity
 
 from app.common.errors import EntityNotFoundError, InvalidDataError
 from app.models.action_card_model import ActionCardBatchModel, ActionCardModel
+from app.models.carbon_forms_model import CarbonFormAnswersModel
 from app.models.model_model import Model
 from app.models.user_model import UserModel
 from app.models.workshop_model import WorkshopModel
@@ -24,6 +25,15 @@ def get_workshop(workshop_id) -> (dict, int):
         coach_id=workshop.coachId
     )
     workshop.model.actionCardBatches = action_cards_batches
+
+    # Append carbon form answers
+    carbon_form_answers = CarbonFormAnswersModel.find_all_by_workshop_id(workshop_id)
+    carbon_form_answers = {
+        cfa.participant.pk: cfa.answers for cfa in carbon_form_answers
+    }  # Convert into dict
+    for wp in workshop.participants:
+        if wp.user.id in carbon_form_answers:
+            wp.surveyVariables = carbon_form_answers[wp.user.id]
 
     return WorkshopDetailSchema().dump(workshop), 200
 

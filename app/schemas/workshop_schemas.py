@@ -21,10 +21,11 @@ class WorkshopParticipantSchema(CustomSchema):
     user = fields.Nested(
         ParticipantSchema, only=("id", "firstName", "lastName", "email")
     )
+    surveyVariables = fields.Dict(keys=fields.Str())
 
     @post_dump
     def flatten_participant(self, data, **kwargs):
-        data = {**data, **data["user"]}
+        data = {**data["user"], **data}
         del data["user"]
         return data
 
