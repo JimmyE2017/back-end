@@ -20,6 +20,11 @@ def test_get_action_cards(client, auth, coach, action_cards):
         "key": action_cards[0].key,
         "sector": action_cards[0].sector,
         "cost": action_cards[0].cost,
+        "impactType": action_cards[0].impactType,
+        "operations": [
+            {"variable": op.variable, "operation": op.operation}
+            for op in action_cards[0].operations
+        ],
     }
 
     assert status_code == 200
