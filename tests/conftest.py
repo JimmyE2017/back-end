@@ -11,7 +11,9 @@ from app.models import db as _db
 from app.models.action_card_model import (
     ActionCardBatchModel,
     ActionCardCategory,
+    ActionCardImpactType,
     ActionCardModel,
+    ActionCardOperationModel,
     ActionCardType,
 )
 from app.models.carbon_forms_model import CarbonFormAnswersModel
@@ -223,6 +225,13 @@ def action_cards(db, request):
         key="action_card_key_1",
         sector="action_card_sector_1",
         cost=1,
+        impactType=ActionCardImpactType.INDIVIDUAL.value,
+        operations=[
+            ActionCardOperationModel(
+                variable="survey_variable_1",
+                operation={"*": [{"var": "survey_variable_1"}, 0.7]},
+            )
+        ],
     )
 
     action_card2 = ActionCardModel(
@@ -233,6 +242,13 @@ def action_cards(db, request):
         key="action_card_key_2",
         sector="action_card_sector_2",
         cost=2,
+        impactType=ActionCardImpactType.COLLECTIVE.value,
+        operations=[
+            ActionCardOperationModel(
+                variable="survey_variable_2",
+                operation={"*": [{"var": "survey_variable_2"}, 0.7]},
+            )
+        ],
     )
     action_card3 = ActionCardModel(
         cardNumber=3,
@@ -242,6 +258,13 @@ def action_cards(db, request):
         key="action_card_key_3",
         sector="action_card_sector_3",
         cost=3,
+        impactType=ActionCardImpactType.SYSTEM.value,
+        operations=[
+            ActionCardOperationModel(
+                variable="global_variable_1",
+                operation={"*": [{"var": "global_variable_1"}, 0.7]},
+            )
+        ],
     )
 
     action_card1.save()

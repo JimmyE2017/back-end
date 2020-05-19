@@ -52,6 +52,11 @@ def test_get_workshop(
                     "key": action_card.key,
                     "sector": action_card.sector,
                     "cost": action_card.cost,
+                    "impactType": action_card.impactType,
+                    "operations": [
+                        {"variable": op.variable, "operation": op.operation}
+                        for op in action_card.operations
+                    ],
                 }
                 for action_card in action_cards
             ],

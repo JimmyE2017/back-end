@@ -1,0 +1,38 @@
+[
+  {
+    "actionCardId": "1",
+    "cardNumber": "1",
+    "name": "action_card_name_1",
+    "category": "eco-friendly action",
+    "type": "individual",
+    "key": "action_card_key_1",
+    "sector": "action_card_sector_1",
+    "cost": "1",
+    "impactType": "individual",
+    "operations": []
+  },
+  {
+    "actionCardId": "2",
+    "cardNumber": "2",
+    "name": "action_card_name_2",
+    "category": "awareness",
+    "type": "individual",
+    "key": "action_card_key_2",
+    "sector": "action_card_sector_2",
+    "cost": "2",
+    "impactType": "individual",
+    "operations": []
+  },
+  {
+    "actionCardId": "3",
+    "cardNumber": "3",
+    "name": "action_card_name_3",
+    "category": "system",
+    "type": "collective",
+    "key": "action_card_key_3",
+    "sector": "action_card_sector_3",
+    "cost": "3",
+    "impactType": "collective",
+    "operations": []
+  }
+]

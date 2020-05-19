@@ -1,7 +1,16 @@
 from marshmallow import ValidationError, fields, post_load, validate
 
-from app.models.action_card_model import ActionCardModel, ActionCardType
+from app.models.action_card_model import (
+    ActionCardImpactType,
+    ActionCardModel,
+    ActionCardType,
+)
 from app.schemas import CustomSchema
+
+
+class ActionCardOperationSchema(CustomSchema):
+    variable = fields.Str()
+    operation = fields.Dict()
 
 
 class ActionCardSchema(CustomSchema):
@@ -13,6 +22,10 @@ class ActionCardSchema(CustomSchema):
     key = fields.Str(validate=validate.Length(min=1, max=128))
     sector = fields.Str(validate=validate.Length(min=1, max=64))
     cost = fields.Integer(strict=True, validate=validate.Length(min=0))
+    impactType = fields.Str(
+        validate=validate.OneOf(choices=[it.value for it in ActionCardImpactType])
+    )
+    operations = fields.List(fields.Nested(ActionCardOperationSchema))
 
 
 class ActionCardBatchSchema(CustomSchema):

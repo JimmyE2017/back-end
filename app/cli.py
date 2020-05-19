@@ -17,7 +17,10 @@ MODELS_WITH_ENABLED_IMPORTCSV = {
     "actionCardBatches": ActionCardBatchModel,
 }
 
-MODELS_WITH_ENABLED_IMPORTJSON = {"models": Model}
+MODELS_WITH_ENABLED_IMPORTJSON = {
+    "models": Model,
+    "actionCards": ActionCardModel,
+}
 
 
 @click.command("create_admin")

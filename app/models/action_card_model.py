@@ -16,6 +16,17 @@ class ActionCardCategory(Enum):
     SYSTEM = "system"
 
 
+class ActionCardImpactType(Enum):
+    INDIVIDUAL = "individual"
+    COLLECTIVE = "collective"
+    SYSTEM = "system"
+
+
+class ActionCardOperationModel(db.EmbeddedDocument):
+    variable = db.StringField(required=True)
+    operation = db.DictField(required=True)
+
+
 class ActionCardModel(db.Document):
     meta = {"collection": "actionCards"}
 
@@ -27,6 +38,10 @@ class ActionCardModel(db.Document):
     key = db.StringField(required=True)
     sector = db.StringField(required=True)
     cost = db.IntField(required=True, min_value=0)
+    impactType = db.StringField()
+    operations = db.ListField(
+        db.EmbeddedDocumentField(ActionCardOperationModel), default=[]
+    )
     createdAt = db.DateTimeField(default=datetime.datetime.utcnow)
     updatedAt = db.DateTimeField(default=datetime.datetime.utcnow)
 
