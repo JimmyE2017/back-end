@@ -1,12 +1,11 @@
-name: Build docker API
-
 on:
   push:
     tags:
       - 'v*'
 
+name: build docker
 jobs:
-  push:
+  build-push:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.1.0
@@ -18,3 +17,24 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository:  2tons/back-end/api
           tag_with_ref: true
+
+name: deploy kubectl
+jobs:
+  deploy:
+    name: deploy to cluster
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: deploy to cluster
+      uses: steebchen/kubectl@master
+      env:
+        KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+      with:
+        args: set image --record deployment/api container=${{ github.repository }}/api:${{ github.ref }}
+    - name: verify deployment
+      uses: steebchen/kubectl@master
+      env:
+        KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        KUBECTL_VERSION: "1.15"
+      with:
+        args: '"rollout status deployment/api"'
