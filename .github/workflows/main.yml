@@ -17,6 +17,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository:  2tons/back-end/api
           tag_with_ref: true
+          tags: latest
 
   deploy:
     name: deploy to cluster
@@ -28,7 +29,7 @@ jobs:
       env:
         KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
       with:
-        args: set image --record deployment/api container=${{ github.repository }}/api:${{ github.ref }}
+        args: set image --record deployment/api container=docker.pkg.github.com/${{ github.repository }}/api:latest
     - name: verify deployment
       uses: steebchen/kubectl@master
       env:
