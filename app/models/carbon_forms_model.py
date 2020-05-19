@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from mongoengine import QuerySet
+
 from app.common.uuid_generator import generate_id
 from app.models import db
 from app.models.user_model import UserModel
@@ -36,3 +38,7 @@ class CarbonFormAnswersModel(db.Document):
         except db.DoesNotExist:
             carbon_form_answers = None
         return carbon_form_answers
+
+    @classmethod
+    def find_all_by_workshop_id(cls, workshop_id: str) -> QuerySet:
+        return cls.objects(workshop=workshop_id).all()

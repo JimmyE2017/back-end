@@ -1,8 +1,18 @@
 import json
 
+from app.models.workshop_model import WorkshopParticipantStatus
+
 
 def test_get_workshop(
-    client, auth, coach, workshop, model, action_cards, action_card_batches, participant
+    client,
+    auth,
+    coach,
+    workshop,
+    model,
+    action_cards,
+    action_card_batches,
+    participant,
+    carbon_form_answers,
 ):
     headers = auth.login(email="coach@test.com")
 
@@ -19,11 +29,12 @@ def test_get_workshop(
         "id": workshop.id,
         "participants": [
             {
-                "status": "created",
+                "status": WorkshopParticipantStatus.TOCHECK.value,
                 "email": participant.email,
                 "firstName": participant.firstName,
                 "lastName": participant.lastName,
                 "id": participant.userId,
+                "surveyVariables": carbon_form_answers.answers,
             }
         ],
         "model": {

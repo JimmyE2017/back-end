@@ -18,7 +18,11 @@ from app.models.carbon_forms_model import CarbonFormAnswersModel
 from app.models.city_model import Cities
 from app.models.model_model import Model
 from app.models.user_model import Roles, UserModel
-from app.models.workshop_model import WorkshopModel, WorkshopParticipantModel
+from app.models.workshop_model import (
+    WorkshopModel,
+    WorkshopParticipantModel,
+    WorkshopParticipantStatus,
+)
 
 
 @pytest.fixture(scope="session")
@@ -391,7 +395,9 @@ def models(db, request):
 
 @pytest.fixture(scope="function")
 def workshop(db, coach, model, participant, request):
-    workshop_participant = WorkshopParticipantModel(user=participant, status="created")
+    workshop_participant = WorkshopParticipantModel(
+        user=participant, status=WorkshopParticipantStatus.CREATED.value
+    )
 
     workshop = WorkshopModel(
         name="workshop_name_1",
@@ -457,7 +463,11 @@ def carbon_form_answers(db, request, workshop, participant):
         answers={"meat_per_day": 9000, "car_type": "futuristic"},
     )
 
+    # Change status in workshop
+    workshop.participants[0].status = WorkshopParticipantStatus.TOCHECK.value
+
     carbon_form_answers.save()
+    workshop.save()
 
     def teardown():
         carbon_form_answers.delete()
