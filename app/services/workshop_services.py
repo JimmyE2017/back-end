@@ -1,7 +1,6 @@
 from flask_jwt_extended import get_jwt_identity
 
 from app.common.errors import EntityNotFoundError, InvalidDataError
-from app.models.action_card_model import ActionCardBatchModel, ActionCardModel
 from app.models.carbon_forms_model import CarbonFormAnswersModel
 from app.models.model_model import Model
 from app.models.user_model import UserModel
@@ -16,24 +15,40 @@ def get_workshop(workshop_id) -> (dict, int):
     if workshop is None:
         raise EntityNotFoundError
 
-    # Append action cards to field model
-    action_cards = ActionCardModel.find_all()
-    workshop.model.actionCards = action_cards
-
-    # Append action card batches from creator to field model
-    action_cards_batches = ActionCardBatchModel.find_action_card_batches_by_coach(
-        coach_id=workshop.coachId
-    )
-    workshop.model.actionCardBatches = action_cards_batches
-
-    # Append carbon form answers
+    workshop.fetch_actions_cards()
+    workshop.fetch_actions_card_batches()
     carbon_form_answers = CarbonFormAnswersModel.find_all_by_workshop_id(workshop_id)
-    carbon_form_answers = {
+    carbon_form_answers = {  # Convert into dict
         cfa.participant.pk: cfa.answers for cfa in carbon_form_answers
-    }  # Convert into dict
+    }
     for wp in workshop.participants:
         if wp.user.id in carbon_form_answers:
             wp.surveyVariables = carbon_form_answers[wp.user.id]
+    return WorkshopDetailSchema().dump(workshop), 200
+
+
+def update_workshop(workshop_id: str, data: bytes) -> (dict, int):
+    workshop = WorkshopModel.find_by_id(workshop_id=workshop_id)
+
+    # Check if given workshop_id exists in DB
+    if workshop is None:
+        raise EntityNotFoundError
+
+    # Deserialize data
+    schema = WorkshopDetailSchema()
+    workshop_data, err_msg, err_code = schema.loads_or_400(data)
+    if err_msg:
+        return err_msg, err_code
+
+    # TODO : Update participant data
+    # Update rounds
+    workshop.rounds = workshop_data.rounds
+    # Save to db
+    workshop.save()
+    workshop.reload()
+
+    workshop.fetch_actions_cards()
+    workshop.fetch_actions_card_batches()
 
     return WorkshopDetailSchema().dump(workshop), 200
 

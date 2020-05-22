@@ -5,6 +5,7 @@ from enum import Enum
 
 from app.common.uuid_generator import generate_id
 from app.models import db
+from app.models.action_card_model import ActionCardBatchModel, ActionCardModel
 from app.models.model_model import Model
 from app.models.user_model import UserModel
 
@@ -18,9 +19,39 @@ class WorkshopParticipantStatus(Enum):
 
 
 class WorkshopParticipantModel(db.EmbeddedDocument):
-
     user = db.ReferenceField(UserModel, db_field="userId")
     status = db.StringField(max_length=32)
+
+
+class WorkshopRoundCarbonFootprintModel(db.EmbeddedDocument):
+    participant = db.LazyReferenceField(UserModel, db_field="participantId")
+    footprint = db.DictField()
+
+
+class WorkshopRoundCarbonVariablesModel(db.EmbeddedDocument):
+    participant = db.LazyReferenceField(UserModel, db_field="participantId")
+    variables = db.DictField()
+
+
+class WorkshopRoundConfigModel(db.EmbeddedDocument):
+    actionCardType = db.StringField()
+    targetedYear = db.IntField()
+    budget = db.IntField()
+    actionCardBatches = db.ListField(
+        db.LazyReferenceField(ActionCardBatchModel), db_field="actionCardBatchIds"
+    )
+
+
+class WorkshopRoundModel(db.EmbeddedDocument):
+    year = db.IntField()
+    carbonVariables = db.ListField(
+        db.EmbeddedDocumentField(WorkshopRoundCarbonVariablesModel)
+    )
+    carbonFootprints = db.ListField(
+        db.EmbeddedDocumentField(WorkshopRoundCarbonFootprintModel)
+    )
+    roundConfig = db.EmbeddedDocumentField(WorkshopRoundConfigModel)
+    globalCarbonVariables = db.DictField()
 
 
 class WorkshopModel(db.Document):
@@ -31,6 +62,7 @@ class WorkshopModel(db.Document):
 
     meta = {"collection": "workshops"}
 
+    # Basic Info
     workshopId = db.StringField(primary_key=True, default=generate_id)
     name = db.StringField(
         required=True, max_length=128, min_length=1, default="Atelier CAPLC"
@@ -43,10 +75,22 @@ class WorkshopModel(db.Document):
     eventUrl = db.StringField(default="caplc.com")
     city = db.StringField(max_length=128, min_length=1)
     address = db.StringField(max_length=512)
+
+    # Configuration
+    startYear = db.IntField(default=2020)
+    endYear = db.IntField(default=2050)
+    yearIncrement = db.IntField(default=3)
+
+    # Participants
     participants = db.ListField(
         db.EmbeddedDocumentField(WorkshopParticipantModel), default=[]
     )
+
+    # Model
     model = db.ReferenceField(Model, db_field="modelId")
+
+    # Rounds
+    rounds = db.ListField(db.EmbeddedDocumentField(WorkshopRoundModel))
 
     def __repr__(self):
         return (
@@ -80,3 +124,14 @@ class WorkshopModel(db.Document):
                 return workshop_participant
 
         return None
+
+    def fetch_actions_cards(self) -> None:
+        action_cards = ActionCardModel.find_all()
+        self.model.actionCards = action_cards
+
+    def fetch_actions_card_batches(self) -> None:
+        # Append action card batches from coach to field model
+        action_cards_batches = ActionCardBatchModel.find_action_card_batches_by_coach(
+            coach_id=self.coachId
+        )
+        self.model.actionCardBatches = action_cards_batches

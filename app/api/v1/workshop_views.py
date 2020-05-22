@@ -13,6 +13,7 @@ from app.services.workshop_services import (
     delete_workshop,
     get_workshop,
     get_workshops,
+    update_workshop,
 )
 
 
@@ -42,6 +43,13 @@ class WorkshopView(MethodView):
     @requires_access_level(Roles.COACH)
     def get(self, workshop_id):
         response, code = get_workshop(workshop_id=workshop_id)
+        return make_response(jsonify(response), code)
+
+    @jwt_required
+    @requires_access_level(Roles.COACH)
+    def put(self, workshop_id):
+        data = request.data
+        response, code = update_workshop(workshop_id=workshop_id, data=data)
         return make_response(jsonify(response), code)
 
 
