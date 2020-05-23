@@ -19,6 +19,7 @@ from app.models.action_card_model import (
 from app.models.carbon_forms_model import CarbonFormAnswersModel
 from app.models.city_model import Cities
 from app.models.model_model import Model
+from app.models.persona_model import PersonaModel
 from app.models.user_model import Roles, UserModel
 from app.models.workshop_model import (
     WorkshopModel,
@@ -497,3 +498,71 @@ def carbon_form_answers(db, request, workshop, participant):
 
     request.addfinalizer(teardown)
     return carbon_form_answers
+
+
+@pytest.fixture(scope="function")
+def personas(db, request):
+    persona1 = PersonaModel(
+        firstName="persona_first_name_1",
+        lastName="persona_last_name_1",
+        description="This is the first persona",
+        answers={"meat_per_day": 9000, "car_type": "futuristic"},
+    )
+
+    persona1.save()
+    persona2 = PersonaModel(
+        firstName="persona_first_name_2",
+        lastName="persona_last_name_2",
+        description="This is the second persona",
+        answers={"meat_per_day": 0, "car_type": None},
+    )
+
+    persona2.save()
+
+    # Delete participant at the end
+    def teardown():
+        persona1.delete()
+        persona2.delete()
+
+    request.addfinalizer(teardown)
+    return [persona1, persona2]
+
+
+@pytest.fixture(scope="function")
+def model_with_personas(db, request, personas):
+    model = Model(
+        footprintStructure={"var1": "var1"},
+        globalCarbonVariables={"var1": "var1"},
+        variableFormulas={"var1": "var1"},
+        createdAt=datetime.utcnow(),
+        personas=personas,
+    )
+    model.save()
+
+    def teardown():
+        model.delete()
+
+    request.addfinalizer(teardown)
+    return model
+
+
+@pytest.fixture(scope="function")
+def workshop_with_persona(db, request, coach, model_with_personas):
+    workshop = WorkshopModel(
+        name="workshop_name_1",
+        startAt=datetime(2020, 1, 1, 1, 1, 1),
+        city="city_1",
+        address="address1",
+        eventUrl="http://www.example1.com",
+        coachId=coach.id,
+        creatorId=coach.id,
+        model=model_with_personas,
+    )
+
+    workshop.save()
+
+    def teardown():
+        workshop.delete()
+
+    request.addfinalizer(teardown)
+    return workshop

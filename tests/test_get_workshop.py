@@ -42,6 +42,7 @@ def test_get_workshop(
             "globalCarbonVariables": model.globalCarbonVariables,
             "variableFormulas": model.variableFormulas,
             "footprintStructure": model.footprintStructure,
+            "personas": [],
             "actionCards": [
                 {
                     "id": action_card.actionCardId,
