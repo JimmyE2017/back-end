@@ -1,4 +1,7 @@
+from datetime import datetime
+
 from flask_jwt_extended import get_jwt_identity
+from marshmallow import ValidationError
 
 from app.common.errors import EntityNotFoundError, InvalidDataError
 from app.models.carbon_forms_model import CarbonFormAnswersModel
@@ -39,10 +42,17 @@ def update_workshop(workshop_id: str, data: bytes) -> (dict, int):
     workshop_data, err_msg, err_code = schema.loads_or_400(data)
     if err_msg:
         return err_msg, err_code
+    try:
+        schema.validate_partipant_id_in_rounds(
+            workshop_data, participant_ids=workshop.get_participant_ids()
+        )
+    except ValidationError as e:
+        raise InvalidDataError(details=e.messages)
 
-    # TODO : Update participant data
     # Update rounds
     workshop.rounds = workshop_data.rounds
+
+    workshop.updateAt = datetime.now()
     # Save to db
     workshop.save()
     workshop.reload()

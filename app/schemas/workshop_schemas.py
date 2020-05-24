@@ -1,4 +1,11 @@
-from marshmallow import fields, post_dump, post_load, pre_dump, validate
+from marshmallow import (
+    ValidationError,
+    fields,
+    post_dump,
+    post_load,
+    pre_dump,
+    validate,
+)
 
 from app.models.action_card_model import ActionCardType
 from app.models.workshop_model import (
@@ -98,7 +105,7 @@ class WorkshopRoundConfigSchema(CustomSchema):
 
 
 class WorkshopRoundSchema(CustomSchema):
-    year = fields.Integer(strict=True)
+    year = fields.Integer(strict=True, required=True)
     carbonVariables = fields.List(fields.Nested(CarbonVariablesSchema), required=True)
     carbonFootprints = fields.List(fields.Nested(CarbonFootprintSchema), required=True)
     roundConfig = fields.Nested(WorkshopRoundConfigSchema)
@@ -118,20 +125,23 @@ class WorkshopDetailSchema(WorkshopSchema):
     model = fields.Nested(WorkshopModelSchema, dump_only=True)
     rounds = fields.List(fields.Nested(WorkshopRoundSchema))
 
-    @post_dump
-    def sort_model_action_cards(self, data, **kwargs):
-        action_cards = data["model"]["actionCards"]
-        action_cards = sorted(action_cards, key=lambda x: x["cardNumber"])
-
-        data["model"]["actionCards"] = action_cards
-        return data
-
-    @post_dump
-    def sort_model_action_card_batches(self, data, **kwargs):
-        action_card_batches = data["model"]["actionCardBatches"]
-        action_card_batches = sorted(action_card_batches, key=lambda x: x["name"])
-
-        data["model"]["actionCardBatches"] = action_card_batches
+    @classmethod
+    def validate_partipant_id_in_rounds(cls, data, participant_ids, **kwargs):
+        for workshop_round in data["rounds"]:
+            for cv in workshop_round.carbonVariables:
+                if cv.participant.pk not in participant_ids:
+                    raise ValidationError(
+                        f"Invalid participant id in round {workshop_round.year}'s"
+                        f" carbonVariables : {cv.participant.pk}",
+                        "carbonVariables",
+                    )
+            for cf in workshop_round.carbonFootprints:
+                if cf.participant.pk not in participant_ids:
+                    raise ValidationError(
+                        f"Invalid participant id in round {workshop_round.year}'s"
+                        f" carbonFootprints : {cf.participant.pk}",
+                        "carbonFootprints",
+                    )
         return data
 
     @post_load

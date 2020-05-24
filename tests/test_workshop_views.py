@@ -205,3 +205,165 @@ def test_put_workshop(
                 ids = [acb.pk for acb in workshop_round_config.actionCardBatches]
                 for acb_id in round_config_data["actionCardBatchIds"]:
                     assert acb_id in ids
+
+
+def test_put_workshop_invalid_participant_in_rounds_carbon_footprints(
+    client,
+    auth,
+    coach,
+    workshop,
+    model,
+    action_cards,
+    action_card_batches,
+    participant,
+    carbon_form_answers,
+):
+    headers = auth.login(email="coach@test.com")
+    data = {
+        "name": "workshop_name_bis",
+        "startAt": "2020-01-01T22:00:00Z",
+        "coachId": workshop.coachId,
+        "city": Cities.PARIS.value,
+        "address": "address_bis",
+        "eventUrl": "http://www.example_bis.com",
+        "startYear": 2020,
+        "endYear": 2050,
+        "yearIncrement": 3,
+        "participants": [
+            # {
+            #     "id": participant.id,
+            #     "firstName": "Participant First name",
+            #     "lastName": "Participant Last name",
+            #     "email": "participant@test.com",
+            #     "status": "tocheck",
+            #     "surveyVariables": {
+            #         "meat_per_day": 9000,
+            #         "car_type": "futuristic"
+            #     }
+            # }
+        ],
+        "rounds": [
+            {
+                "year": 2020,
+                "carbonVariables": [
+                    {
+                        "participantId": participant.id,
+                        "variables": {
+                            "hours_urban_train_per_week": 10,
+                            "km_country_train": 5,
+                            "km_plane": 200,
+                        },
+                    }
+                ],
+                "carbonFootprints": [
+                    {
+                        "participantId": "wrong id",
+                        "footprint": {
+                            "transport": {
+                                "plane": 1000,
+                                "train": {"urbanTrain": 100, "mainlineTrain": 500},
+                            }
+                        },
+                    }
+                ],
+                "roundConfig": {
+                    "actionCardType": "individual",
+                    "targetedYear": 2023,
+                    "budget": 4,
+                    "actionCardBatchIds": [
+                        "actionCardId1",
+                        "actionCardId2",
+                        "actionCardId4",
+                    ],
+                },
+            }
+        ],
+    }
+    response = client.put(
+        "/api/v1/workshops/{}".format(workshop.id),
+        headers=headers,
+        data=json.dumps(data),
+    )
+
+    assert response.status_code == 400
+
+
+def test_put_workshop_invalid_participant_in_rounds_(
+    client,
+    auth,
+    coach,
+    workshop,
+    model,
+    action_cards,
+    action_card_batches,
+    participant,
+    carbon_form_answers,
+):
+    headers = auth.login(email="coach@test.com")
+    data = {
+        "name": "workshop_name_bis",
+        "startAt": "2020-01-01T22:00:00Z",
+        "coachId": workshop.coachId,
+        "city": Cities.PARIS.value,
+        "address": "address_bis",
+        "eventUrl": "http://www.example_bis.com",
+        "startYear": 2020,
+        "endYear": 2050,
+        "yearIncrement": 3,
+        "participants": [
+            # {
+            #     "id": participant.id,
+            #     "firstName": "Participant First name",
+            #     "lastName": "Participant Last name",
+            #     "email": "participant@test.com",
+            #     "status": "tocheck",
+            #     "surveyVariables": {
+            #         "meat_per_day": 9000,
+            #         "car_type": "futuristic"
+            #     }
+            # }
+        ],
+        "rounds": [
+            {
+                "year": 2020,
+                "carbonVariables": [
+                    {
+                        "participantId": "Wrong Id",
+                        "variables": {
+                            "hours_urban_train_per_week": 10,
+                            "km_country_train": 5,
+                            "km_plane": 200,
+                        },
+                    }
+                ],
+                "carbonFootprints": [
+                    {
+                        "participantId": participant.id,
+                        "footprint": {
+                            "transport": {
+                                "plane": 1000,
+                                "train": {"urbanTrain": 100, "mainlineTrain": 500},
+                            }
+                        },
+                    }
+                ],
+                "roundConfig": {
+                    "actionCardType": "individual",
+                    "targetedYear": 2023,
+                    "budget": 4,
+                    "actionCardBatchIds": [
+                        "actionCardId1",
+                        "actionCardId2",
+                        "actionCardId4",
+                    ],
+                },
+            }
+        ],
+    }
+    response = client.put(
+        "/api/v1/workshops/{}".format(workshop.id),
+        headers=headers,
+        data=json.dumps(data),
+    )
+
+    assert response.status_code == 400
