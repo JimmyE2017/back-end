@@ -19,6 +19,7 @@ from app.models.action_card_model import (
 from app.models.carbon_forms_model import CarbonFormAnswersModel
 from app.models.city_model import Cities
 from app.models.model_model import Model
+from app.models.persona_model import PersonaModel
 from app.models.user_model import Roles, UserModel
 from app.models.workshop_model import (
     WorkshopModel,
@@ -343,7 +344,7 @@ def action_card_batches(action_cards, coach, request):
 
 
 @pytest.fixture(scope="function")
-def model(db, request):
+def model(db, personas, request):
     model = Model(
         footprintStructure={
             "cf1": "variable_1",
@@ -378,6 +379,7 @@ def model(db, request):
                 ]
             },
         },
+        personas=[persona for persona in personas],
     )
 
     model.save()
@@ -497,3 +499,31 @@ def carbon_form_answers(db, request, workshop, participant):
 
     request.addfinalizer(teardown)
     return carbon_form_answers
+
+
+@pytest.fixture(scope="function")
+def personas(db, request):
+    persona1 = PersonaModel(
+        firstName="persona_first_name_1",
+        lastName="persona_last_name_1",
+        description="This is the first persona",
+        answers={"meat_per_day": 9000, "car_type": "futuristic"},
+    )
+
+    persona1.save()
+    persona2 = PersonaModel(
+        firstName="persona_first_name_2",
+        lastName="persona_last_name_2",
+        description="This is the second persona",
+        answers={"meat_per_day": 0, "car_type": None},
+    )
+
+    persona2.save()
+
+    # Delete participant at the end
+    def teardown():
+        persona1.delete()
+        persona2.delete()
+
+    request.addfinalizer(teardown)
+    return [persona1, persona2]

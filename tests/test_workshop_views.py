@@ -14,6 +14,7 @@ def test_get_workshop(
     action_card_batches,
     participant,
     carbon_form_answers,
+    personas,
 ):
     headers = auth.login(email="coach@test.com")
 
@@ -69,6 +70,16 @@ def test_get_workshop(
                     "actionCardIds": action_card_batch.actionCardIds,
                 }
                 for action_card_batch in action_card_batches
+            ],
+            "personas": [
+                {
+                    "id": persona.id,
+                    "firstName": persona.firstName,
+                    "lastName": persona.lastName,
+                    "description": persona.description,
+                    "answers": persona.answers,
+                }
+                for persona in personas
             ],
         },
     }

@@ -17,7 +17,7 @@ from app.models.workshop_model import (
 )
 from app.schemas import CustomSchema
 from app.schemas.action_card_schemas import ActionCardBatchSchema, ActionCardSchema
-from app.schemas.user_schemas import ParticipantSchema
+from app.schemas.user_schemas import ParticipantSchema, PersonaSchema
 
 
 class WorkshopSchema(CustomSchema):
@@ -52,6 +52,7 @@ class WorkshopModelSchema(CustomSchema):
     globalCarbonVariables = fields.Dict()
     actionCards = fields.List(fields.Nested(ActionCardSchema))
     actionCardBatches = fields.List(fields.Nested(ActionCardBatchSchema))
+    personas = fields.List(fields.Nested(PersonaSchema))
 
 
 class CarbonFootprintSchema(CustomSchema):

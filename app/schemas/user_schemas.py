@@ -52,3 +52,11 @@ class CoachSchema(UserSchema):
             key=lambda x: x[1],
         )[0]
         return in_data
+
+
+class PersonaSchema(CustomSchema):
+    id = fields.Str(dump_only=True)
+    firstName = fields.Str(required=True, validate=validate.Length(min=1, max=64))
+    lastName = fields.Str(required=True, validate=validate.Length(min=1, max=64))
+    description = fields.Str(required=False)
+    answers = fields.Dict(keys=fields.Str())
