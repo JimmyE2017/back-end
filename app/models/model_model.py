@@ -18,7 +18,7 @@ class Model(db.Document):
     variableFormulas = db.DictField(required=True)
     createdAt = db.DateTimeField(default=datetime.datetime.utcnow)
     updatedAt = db.DateTimeField(default=datetime.datetime.utcnow)
-    personas = db.ListField(db.ReferenceField(PersonaModel, db_field="id"), default=[])
+    personas = db.ListField(db.ReferenceField(PersonaModel), default=[], db_field='personaIds')
 
     @classmethod
     def find_last_created_model(cls) -> Model:
