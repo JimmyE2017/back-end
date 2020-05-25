@@ -28,6 +28,10 @@ def test_get_workshop(
         "coachId": workshop.coachId,
         "creatorId": workshop.creatorId,
         "id": workshop.id,
+        "startYear": workshop.startYear,
+        "endYear": workshop.endYear,
+        "rounds": workshop.rounds,
+        "yearIncrement": workshop.yearIncrement,
         "participants": [
             {
                 "status": WorkshopParticipantStatus.TOCHECK.value,
