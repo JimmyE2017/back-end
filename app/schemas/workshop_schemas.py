@@ -12,7 +12,9 @@ from app.models.workshop_model import (
     WorkshopModel,
     WorkshopRoundCarbonFootprintModel,
     WorkshopRoundCarbonVariablesModel,
+    WorkshopRoundCollectiveChoicesModel,
     WorkshopRoundConfigModel,
+    WorkshopRoundIndividualChoicesModel,
     WorkshopRoundModel,
 )
 from app.schemas import CustomSchema
@@ -53,6 +55,16 @@ class WorkshopModelSchema(CustomSchema):
     actionCards = fields.List(fields.Nested(ActionCardSchema))
     actionCardBatches = fields.List(fields.Nested(ActionCardBatchSchema))
     personas = fields.List(fields.Nested(PersonaSchema))
+
+    @post_dump
+    def rename_fk(self, data, **kwargs):
+        for d in data["actionCards"]:
+            d["actionCardId"] = d.pop("id")
+        for d in data["actionCardBatches"]:
+            d["actionCardBatchId"] = d.pop("id")
+        for d in data["personas"]:
+            d["personaId"] = d.pop("id")
+        return data
 
 
 class CarbonFootprintSchema(CustomSchema):
@@ -105,12 +117,54 @@ class WorkshopRoundConfigSchema(CustomSchema):
         return WorkshopRoundConfigModel(**data)
 
 
+class WorkshopRoundCollectiveChoicesSchema(CustomSchema):
+    actionCardIds = fields.List(fields.Str())
+
+    @pre_dump
+    def fetch_ids(self, data, **kwargs):
+        data.actionCardIds = [acb.pk for acb in data.actionCards]
+        return data
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        data["actionCards"] = data.pop("actionCardIds")
+        return WorkshopRoundCollectiveChoicesModel(**data)
+
+
+class WorkshopRoundIndividualChoicesSchema(CustomSchema):
+    participantId = fields.Str(required=True)
+    actionCardIds = fields.List(fields.Str())
+
+    @pre_dump
+    def fetch_ids(self, data, **kwargs):
+        data.participantId = data.participant.pk
+        data.actionCardIds = [acb.pk for acb in data.actionCards]
+        return data
+
+    @post_load
+    def make_object(self, data, **kwargs):
+        data["participant"] = data.pop("participantId")
+        data["actionCards"] = data.pop("actionCardIds")
+        return WorkshopRoundIndividualChoicesModel(**data)
+
+
 class WorkshopRoundSchema(CustomSchema):
     year = fields.Integer(strict=True, required=True)
     carbonVariables = fields.List(fields.Nested(CarbonVariablesSchema), required=True)
     carbonFootprints = fields.List(fields.Nested(CarbonFootprintSchema), required=True)
     roundConfig = fields.Nested(WorkshopRoundConfigSchema)
     globalCarbonVariables = fields.Dict(keys=fields.Str())
+    individualChoices = fields.List(fields.Nested(WorkshopRoundIndividualChoicesSchema))
+    collectiveChoices = fields.Nested(WorkshopRoundCollectiveChoicesSchema)
+
+    @post_dump
+    def clean_choices(self, data, **kwargs):
+        # Remove individualChoices or collectiveChoices if they are None
+        if data["individualChoices"] is None:
+            del data["individualChoices"]
+        if data["collectiveChoices"] is None:
+            del data["collectiveChoices"]
+        return data
 
     @post_load
     def make_object(self, data, **kwargs):
@@ -143,6 +197,13 @@ class WorkshopDetailSchema(WorkshopSchema):
                         f" carbonFootprints : {cf.participant.pk}",
                         "carbonFootprints",
                     )
+        return data
+
+    @post_dump
+    def rename_fk(self, data, **kwargs):
+        data["model"]["modelId"] = data["model"].pop("id")
+        for d in data["participants"]:
+            d["participantId"] = d.pop("id")
         return data
 
     @post_load

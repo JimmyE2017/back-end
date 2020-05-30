@@ -59,4 +59,9 @@ class PersonaSchema(CustomSchema):
     firstName = fields.Str(required=True, validate=validate.Length(min=1, max=64))
     lastName = fields.Str(required=True, validate=validate.Length(min=1, max=64))
     description = fields.Str(required=False)
-    answers = fields.Dict(keys=fields.Str())
+    surveyVariables = fields.Dict(keys=fields.Str())
+
+    @pre_dump
+    def rename_carbon_form_answers(self, data, **kwargs):
+        data.surveyVariables = data.carbonFormAnswers
+        return data

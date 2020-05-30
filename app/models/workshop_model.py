@@ -42,6 +42,19 @@ class WorkshopRoundConfigModel(db.EmbeddedDocument):
     )
 
 
+class WorkshopRoundCollectiveChoicesModel(db.EmbeddedDocument):
+    actionCards = db.ListField(
+        db.LazyReferenceField(ActionCardModel), db_field="actionCardIds"
+    )
+
+
+class WorkshopRoundIndividualChoicesModel(db.EmbeddedDocument):
+    participant = db.LazyReferenceField(UserModel, db_field="participantId")
+    actionCards = db.ListField(
+        db.LazyReferenceField(ActionCardModel), db_field="actionCardIds"
+    )
+
+
 class WorkshopRoundModel(db.EmbeddedDocument):
     year = db.IntField()
     carbonVariables = db.ListField(
@@ -52,6 +65,10 @@ class WorkshopRoundModel(db.EmbeddedDocument):
     )
     roundConfig = db.EmbeddedDocumentField(WorkshopRoundConfigModel)
     globalCarbonVariables = db.DictField()
+    collectiveChoices = db.EmbeddedDocumentField(WorkshopRoundCollectiveChoicesModel)
+    individualChoices = db.ListField(
+        db.EmbeddedDocumentField(WorkshopRoundIndividualChoicesModel), default=None
+    )
 
 
 class WorkshopModel(db.Document):

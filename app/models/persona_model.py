@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import datetime
 
-from flask import current_app
-
 from app.common.uuid_generator import generate_id
 from app.models import db
 
@@ -18,7 +16,7 @@ class PersonaModel(db.Document):
     description = db.StringField()
     createdAt = db.DateTimeField(default=datetime.datetime.utcnow)
     updatedAt = db.DateTimeField(default=datetime.datetime.utcnow)
-    answers = db.DictField(required=True)
+    carbonFormAnswers = db.DictField(required=True)
 
     def __str__(self):
         return f"Persona {self.id} - {self.firstName} {self.lastName}"
