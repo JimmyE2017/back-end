@@ -25,6 +25,12 @@ from app.models.workshop_model import (
     WorkshopModel,
     WorkshopParticipantModel,
     WorkshopParticipantStatus,
+    WorkshopRoundCarbonFootprintModel,
+    WorkshopRoundCarbonVariablesModel,
+    WorkshopRoundCollectiveChoicesModel,
+    WorkshopRoundConfigModel,
+    WorkshopRoundIndividualChoicesModel,
+    WorkshopRoundModel,
 )
 
 
@@ -326,7 +332,7 @@ def action_card_batches(action_cards, coach, request):
         coachId=coach.id,
         name="action_card_batch_name_2",
         type=ActionCardType.COLLECTIVE.value,
-        actionCardIds=["1", "3"],
+        actionCardIds=["3"],
     )
     action_card_batch1.save()
     action_card_batch2.save()
@@ -419,9 +425,67 @@ def models(db, request):
 
 
 @pytest.fixture(scope="function")
-def workshop(db, coach, model, participant, request):
+def workshop(db, coach, model, participant, action_card_batches, request):
     workshop_participant = WorkshopParticipantModel(
         user=participant, status=WorkshopParticipantStatus.CREATED.value
+    )
+
+    round1 = WorkshopRoundModel(
+        year=2020,
+        carbonVariables=[
+            WorkshopRoundCarbonVariablesModel(
+                participant=participant, variables={"var1": 100}
+            )
+        ],
+        carbonFootprints=[
+            WorkshopRoundCarbonFootprintModel(
+                participant=participant,
+                footprint={"cf1": 200, "cf2": {"cf2_1": 201, "cf2_2": 202}},
+            )
+        ],
+        roundConfig=WorkshopRoundConfigModel(
+            actionCardType=ActionCardType.INDIVIDUAL.value,
+            targetedYear=2023,
+            budget=4,
+            actionCardBatches=[action_card_batches[0].pk],
+        ),
+        globalCarbonVariables={
+            "global_variable_1": 50,
+            "global_variable_2": {"key1": 51, "key2": 52},
+        },
+        individualChoices=[
+            WorkshopRoundIndividualChoicesModel(
+                participant=participant,
+                actionCards=[action_card_batches[0].actionCardIds[0]],
+            )
+        ],
+    )
+    round2 = WorkshopRoundModel(
+        year=2020,
+        carbonVariables=[
+            WorkshopRoundCarbonVariablesModel(
+                participant=participant, variables={"var1": 50}
+            )
+        ],
+        carbonFootprints=[
+            WorkshopRoundCarbonFootprintModel(
+                participant=participant,
+                footprint={"cf1": 100, "cf2": {"cf2_1": 101, "cf2_2": 102}},
+            )
+        ],
+        roundConfig=WorkshopRoundConfigModel(
+            actionCardType=ActionCardType.COLLECTIVE.value,
+            targetedYear=2026,
+            budget=4,
+            actionCardBatches=[action_card_batches[1].pk],
+        ),
+        globalCarbonVariables={
+            "global_variable_1": 25,
+            "global_variable_2": {"key1": 26, "key2": 27},
+        },
+        collectiveChoices=WorkshopRoundCollectiveChoicesModel(
+            actionCards=[action_card_batches[1].actionCardIds[0]]
+        ),
     )
 
     workshop = WorkshopModel(
@@ -434,6 +498,7 @@ def workshop(db, coach, model, participant, request):
         creatorId=coach.id,
         model=model,
         participants=[workshop_participant],
+        rounds=[round1, round2],
     )
     workshop.save()
     participant.workshopParticipations.append(workshop.id)
@@ -507,7 +572,7 @@ def personas(db, request):
         firstName="persona_first_name_1",
         lastName="persona_last_name_1",
         description="This is the first persona",
-        answers={"meat_per_day": 9000, "car_type": "futuristic"},
+        carbonFormAnswers={"meat_per_day": 9000, "car_type": "futuristic"},
     )
 
     persona1.save()
@@ -515,7 +580,7 @@ def personas(db, request):
         firstName="persona_first_name_2",
         lastName="persona_last_name_2",
         description="This is the second persona",
-        answers={"meat_per_day": 0, "car_type": None},
+        carbonFormAnswers={"meat_per_day": 0, "car_type": None},
     )
 
     persona2.save()

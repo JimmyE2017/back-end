@@ -31,7 +31,6 @@ def test_get_workshop(
         "id": workshop.id,
         "startYear": workshop.startYear,
         "endYear": workshop.endYear,
-        "rounds": workshop.rounds,
         "yearIncrement": workshop.yearIncrement,
         "participants": [
             {
@@ -39,18 +38,18 @@ def test_get_workshop(
                 "email": participant.email,
                 "firstName": participant.firstName,
                 "lastName": participant.lastName,
-                "id": participant.userId,
+                "participantId": participant.userId,
                 "surveyVariables": carbon_form_answers.answers,
             }
         ],
         "model": {
-            "id": model.id,
+            "modelId": model.id,
             "globalCarbonVariables": model.globalCarbonVariables,
             "variableFormulas": model.variableFormulas,
             "footprintStructure": model.footprintStructure,
             "actionCards": [
                 {
-                    "id": action_card.actionCardId,
+                    "actionCardId": action_card.actionCardId,
                     "cardNumber": action_card.cardNumber,
                     "name": action_card.name,
                     "category": action_card.category,
@@ -68,7 +67,7 @@ def test_get_workshop(
             ],
             "actionCardBatches": [
                 {
-                    "id": action_card_batch.actionCardBatchId,
+                    "actionCardBatchId": action_card_batch.actionCardBatchId,
                     "name": action_card_batch.name,
                     "type": action_card_batch.type,
                     "actionCardIds": action_card_batch.actionCardIds,
@@ -77,15 +76,55 @@ def test_get_workshop(
             ],
             "personas": [
                 {
-                    "id": persona.id,
+                    "personaId": persona.id,
                     "firstName": persona.firstName,
                     "lastName": persona.lastName,
                     "description": persona.description,
-                    "answers": persona.answers,
+                    "surveyVariables": persona.carbonFormAnswers,
                 }
                 for persona in personas
             ],
         },
+        "rounds": [
+            {
+                "year": workshop_round.year,
+                "carbonVariables": [
+                    {"participantId": cv.participant.pk, "variables": cv.variables}
+                    for cv in workshop_round.carbonVariables
+                ],
+                "carbonFootprints": [
+                    {"participantId": cf.participant.pk, "footprint": cf.footprint}
+                    for cf in workshop_round.carbonFootprints
+                ],
+                "roundConfig": {
+                    "actionCardType": workshop_round.roundConfig.actionCardType,
+                    "targetedYear": workshop_round.roundConfig.targetedYear,
+                    "budget": workshop_round.roundConfig.budget,
+                    "actionCardBatchIds": [
+                        acb.pk for acb in workshop_round.roundConfig.actionCardBatches
+                    ],
+                },
+                "globalCarbonVariables": workshop_round.globalCarbonVariables,
+                # Using short hand statement
+                # since collectiveChoices / indivudalChoices are alternating
+                "collectiveChoices"
+                if workshop_round.collectiveChoices is not None
+                else "individualChoices": {
+                    "actionCardIds": [
+                        ac.pk for ac in workshop_round.collectiveChoices.actionCards
+                    ]
+                }
+                if workshop_round.collectiveChoices is not None
+                else [
+                    {
+                        "participantId": ic.participant.pk,
+                        "actionCardIds": [ac.pk for ac in ic.actionCards],
+                    }
+                    for ic in workshop_round.individualChoices
+                ],
+            }
+            for workshop_round in workshop.rounds
+        ],
     }
     assert status_code == 200
     assert response_data == expected_output
@@ -129,38 +168,41 @@ def test_put_workshop(
         "rounds": [
             {
                 "year": 2020,
-                "carbonVariables": [
-                    {
-                        "participantId": participant.id,
-                        "variables": {
-                            "hours_urban_train_per_week": 10,
-                            "km_country_train": 5,
-                            "km_plane": 200,
-                        },
-                    }
-                ],
+                "carbonVariables": [{"participantId": participant.id, "variables": {}}],
                 "carbonFootprints": [
-                    {
-                        "participantId": participant.id,
-                        "footprint": {
-                            "transport": {
-                                "plane": 1000,
-                                "train": {"urbanTrain": 100, "mainlineTrain": 500},
-                            }
-                        },
-                    }
+                    {"participantId": participant.id, "footprint": {}}
                 ],
                 "roundConfig": {
                     "actionCardType": "individual",
                     "targetedYear": 2023,
                     "budget": 4,
-                    "actionCardBatchIds": [
-                        "actionCardId1",
-                        "actionCardId2",
-                        "actionCardId4",
-                    ],
+                    "actionCardBatchIds": [action_card_batches[0].pk],
                 },
-            }
+                "globalCarbonVariables": {},
+                "individualChoices": [
+                    {
+                        "participantId": participant.id,
+                        "actionCardIds": [action_card_batches[0].actionCardIds[0]],
+                    }
+                ],
+            },
+            {
+                "year": 2023,
+                "carbonVariables": [{"participantId": participant.id, "variables": {}}],
+                "carbonFootprints": [
+                    {"participantId": participant.id, "footprint": {}}
+                ],
+                "roundConfig": {
+                    "actionCardType": "collective",
+                    "targetedYear": 2026,
+                    "budget": 4,
+                    "actionCardBatchIds": [action_card_batches[1].pk],
+                },
+                "globalCarbonVariables": {},
+                "collectiveChoices": {
+                    "actionCardIds": [action_card_batches[1].actionCardIds[0]]
+                },
+            },
         ],
     }
     response = client.put(
@@ -220,6 +262,31 @@ def test_put_workshop(
                 ids = [acb.pk for acb in workshop_round_config.actionCardBatches]
                 for acb_id in round_config_data["actionCardBatchIds"]:
                     assert acb_id in ids
+        # Assert individualChoices is updated
+        if "individualChoices" in round_data:
+            assert workshop_round.individualChoices is not None
+            for individual_choices_data in round_data["individualChoices"]:
+                individual_choices = [
+                    x
+                    for x in workshop_round.individualChoices
+                    if x.participant.pk == individual_choices_data["participantId"]
+                ]
+                assert (
+                    len(individual_choices) == 1
+                )  # Assert existance of indivualChoicesModel for given participant
+                individual_choices = individual_choices[0]
+                for action_card_id in individual_choices_data["actionCardIds"]:
+                    assert action_card_id in [
+                        ac.pk for ac in individual_choices.actionCards
+                    ]
+        # Assert collectiveChoices is updated
+        if "collectiveChoices" in round_data:
+            assert workshop_round.collectiveChoices is not None
+
+            for action_card_id in round_data["collectiveChoices"]["actionCardIds"]:
+                assert action_card_id in [
+                    ac.pk for ac in workshop_round.collectiveChoices.actionCards
+                ]
 
 
 def test_put_workshop_invalid_participant_in_rounds_carbon_footprints(
