@@ -56,7 +56,9 @@ class ActionCardBatchModel(db.Document):
     actionCardBatchId = db.StringField(primary_key=True, default=generate_id)
     coachId = db.StringField()
     name = db.StringField(required=True)
-    actionCardIds = db.ListField(db.StringField(), required=True)
+    actionCards = db.ListField(
+        db.LazyReferenceField(ActionCardModel), db_field="actionCardIds", required=True
+    )
     type = db.StringField(required=True)
     default = db.BooleanField()
     createdAt = db.DateTimeField(default=datetime.datetime.utcnow)

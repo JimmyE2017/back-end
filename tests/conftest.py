@@ -294,14 +294,14 @@ def default_action_card_batches(action_cards, request):
         default=True,
         name="action_card_batch_name_1",
         type=ActionCardType.INDIVIDUAL.value,
-        actionCardIds=["1", "2"],
+        actionCards=["1", "2"],
     )
 
     action_card_batch2 = ActionCardBatchModel(
         default=True,
         name="action_card_batch_name_2",
         type=ActionCardType.COLLECTIVE.value,
-        actionCardIds=["1", "3"],
+        actionCards=["3"],
     )
     action_card_batch1.save()
     action_card_batch2.save()
@@ -325,14 +325,14 @@ def action_card_batches(action_cards, coach, request):
         coachId=coach.id,
         name="action_card_batch_name_1",
         type=ActionCardType.INDIVIDUAL.value,
-        actionCardIds=["1", "2"],
+        actionCards=["1", "2"],
     )
 
     action_card_batch2 = ActionCardBatchModel(
         coachId=coach.id,
         name="action_card_batch_name_2",
         type=ActionCardType.COLLECTIVE.value,
-        actionCardIds=["3"],
+        actionCards=["3"],
     )
     action_card_batch1.save()
     action_card_batch2.save()
@@ -456,7 +456,7 @@ def workshop(db, coach, model, participant, action_card_batches, request):
         individualChoices=[
             WorkshopRoundIndividualChoicesModel(
                 participant=participant,
-                actionCards=[action_card_batches[0].actionCardIds[0]],
+                actionCards=[action_card_batches[0].actionCards[0].pk],
             )
         ],
     )
@@ -484,7 +484,7 @@ def workshop(db, coach, model, participant, action_card_batches, request):
             "global_variable_2": {"key1": 26, "key2": 27},
         },
         collectiveChoices=WorkshopRoundCollectiveChoicesModel(
-            actionCards=[action_card_batches[1].actionCardIds[0]]
+            actionCards=[action_card_batches[1].actionCards[0].pk]
         ),
     )
 

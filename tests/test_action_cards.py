@@ -44,7 +44,7 @@ def test_get_action_card_batches(client, auth, coach, action_card_batches):
         "id": action_card_batches[0].actionCardBatchId,
         "name": action_card_batches[0].name,
         "type": action_card_batches[0].type,
-        "actionCardIds": action_card_batches[0].actionCardIds,
+        "actionCardIds": [ac.pk for ac in action_card_batches[0].actionCards],
     }
 
     assert status_code == 200

@@ -61,7 +61,7 @@ def create_coach(data: bytes) -> (dict, int):
         ActionCardBatchModel(
             coachId=user.id,
             name=default_action_card_batch.name,
-            actionCardIds=default_action_card_batch.actionCardIds,
+            actionCards=default_action_card_batch.actionCards,
             type=default_action_card_batch.type,
         ).save()
 

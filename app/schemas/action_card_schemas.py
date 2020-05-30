@@ -1,4 +1,4 @@
-from marshmallow import ValidationError, fields, post_load, validate
+from marshmallow import ValidationError, fields, post_load, pre_dump, validate
 
 from app.models.action_card_model import (
     ActionCardImpactType,
@@ -37,6 +37,16 @@ class ActionCardBatchSchema(CustomSchema):
             choices=[action_card_type.value for action_card_type in ActionCardType]
         )
     )
+
+    @pre_dump
+    def fetch_ids(self, data, **kwargs):
+        data.actionCardIds = [acb.pk for acb in data.actionCards]
+        return data
+
+    @post_load
+    def rename_action_cards_ids_field(self, data, **kwargs):
+        data["actionCards"] = data.pop("actionCardIds")
+        return data
 
     @post_load(pass_many=True)
     def check_action_card_ids(self, data, many, **kwargs):

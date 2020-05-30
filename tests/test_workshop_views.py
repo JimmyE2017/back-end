@@ -70,7 +70,7 @@ def test_get_workshop(
                     "actionCardBatchId": action_card_batch.actionCardBatchId,
                     "name": action_card_batch.name,
                     "type": action_card_batch.type,
-                    "actionCardIds": action_card_batch.actionCardIds,
+                    "actionCardIds": [ac.pk for ac in action_card_batch.actionCards],
                 }
                 for action_card_batch in action_card_batches
             ],
@@ -182,7 +182,7 @@ def test_put_workshop(
                 "individualChoices": [
                     {
                         "participantId": participant.id,
-                        "actionCardIds": [action_card_batches[0].actionCardIds[0]],
+                        "actionCardIds": [action_card_batches[0].actionCards[0].pk],
                     }
                 ],
             },
@@ -200,7 +200,7 @@ def test_put_workshop(
                 },
                 "globalCarbonVariables": {},
                 "collectiveChoices": {
-                    "actionCardIds": [action_card_batches[1].actionCardIds[0]]
+                    "actionCardIds": [action_card_batches[1].actionCards[0].pk]
                 },
             },
         ],
