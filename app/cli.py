@@ -9,6 +9,7 @@ from app.models import db
 from app.models.action_card_model import ActionCardBatchModel, ActionCardModel
 from app.models.city_model import Cities
 from app.models.model_model import Model
+from app.models.persona_model import PersonaModel
 from app.models.user_model import Roles
 from app.services.coach_services import create_coach
 
@@ -20,6 +21,7 @@ MODELS_WITH_ENABLED_IMPORTCSV = {
 MODELS_WITH_ENABLED_IMPORTJSON = {
     "models": Model,
     "actionCards": ActionCardModel,
+    "personas": PersonaModel,
 }
 
 
